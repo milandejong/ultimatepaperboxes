@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Box Layout Generator</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f9fafb;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .controls-container {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        width: 80vw;
+        max-width: 600px;
+      }
+      .control-group {
+        margin-bottom: 1rem;
+      }
+      .control-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #374151;
+      }
+      .control-group input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+      }
+      .control-group input:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin-top: 1rem;
+      }
+      .checkbox-group input {
+        width: auto;
+        margin-right: 0.5rem;
+      }
+      .checkbox-group label {
+        margin: 0;
+        font-weight: 500;
+      }
+      .generate-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #6366f1;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 1rem;
+      }
+      .generate-btn:hover {
+        background-color: #4f46e5;
+      }
+      .download-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 0.75rem;
+        background-color: #10b981;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 0.75rem;
+      }
+      .download-btn:hover {
+        background-color: #059669;
+      }
+      .preview-wrapper {
+        display: flex;
+        gap: 2rem;
+        width: 80vw;
+        margin-bottom: 2rem;
+      }
+      .svg-preview-container {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        padding: 1rem;
+        flex: 1;
+        height: 70vh;
+      }
+      .svg-preview-container > div {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .svg-preview-container svg {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+      }
+      .preview-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+        text-align: center;
+      }
+      h1 {
+        font-size: 1.875rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #111827;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Interactive Box Layout Generator</h1>
+
+    <div class="controls-container">
+      <div class="control-group">
+        <label for="width">Box Width (W) in mm:</label>
+        <input type="number" id="width" value="61" min="10" />
+      </div>
+
+      <div class="control-group">
+        <label for="depth">Box Depth (D) in mm:</label>
+        <input type="number" id="depth" value="46" min="10" />
+      </div>
+
+      <div class="control-group">
+        <label for="height">Box Height (H) in mm:</label>
+        <input type="number" id="height" value="25" min="10" />
+      </div>
+
+      <div class="control-group">
+        <label for="lidHeight">Lid Height in mm:</label>
+        <input type="number" id="lidHeight" value="20" min="10" />
+      </div>
+
+      <div class="control-group">
+        <label for="allowance">Paper Allowance in mm:</label>
+        <input
+          type="number"
+          id="allowance"
+          value="3"
+          min="0"
+          max="10"
+          step="0.5"
+        />
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="showLabels" checked />
+        <label for="showLabels">Show Panel Labels</label>
+      </div>
+
+      <button class="generate-btn" onclick="generateBox()">
+        Generate Box & Lid Layouts
+      </button>
+    </div>
+
+    <div class="preview-wrapper">
+      <div>
+        <div class="preview-title">Box Layout</div>
+        <div class="svg-preview-container">
+          <div id="svg-container-box" class="w-full h-full"></div>
+        </div>
+        <button
+          class="download-btn"
+          onclick="downloadSVG('svg-container-box', 'box-layout.svg')"
+        >
+          Download Box SVG
+        </button>
+      </div>
+
+      <div>
+        <div class="preview-title">Lid Layout</div>
+        <div class="svg-preview-container">
+          <div id="svg-container-lid" class="w-full h-full"></div>
+        </div>
+        <button
+          class="download-btn"
+          onclick="downloadSVG('svg-container-lid', 'lid-layout.svg')"
+        >
+          Download Lid SVG
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const MM_TO_PX = 3;
+
+      const LAYOUT_CONSTANTS = {
+        margin: 20,
+        panelGHeight: 10,
+        sideFlapWidth: 10,
+      };
+
+      const STYLES = {
+        cut: "stroke:black; stroke-width:0.25; fill:none;",
+        fold: {
+          mountain: "stroke:#CCCCCC; stroke-width:0.25; fill:none;",
+          valley:
+            "stroke:#CCCCCC; stroke-width:0.25; stroke-dasharray: 1 4; fill:none;",
+        },
+        text: {
+          primary:
+            "fill:black; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;",
+          muted:
+            "fill:#CCCCCC; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;",
+        },
+      };
+
+      function createLineElement(x1, y1, x2, y2, style) {
+        return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="${style}" />`;
+      }
+
+      function createTextElement({ x, y, content, style, rotation }) {
+        const rotationAttr = rotation
+          ? ` transform="rotate(${rotation} ${x} ${y})"`
+          : "";
+        return `<text x="${x}" y="${y}" style="${style}"${rotationAttr}>${content}</text>`;
+      }
+
+      function computeLayout(W, H, D, allowance) {
+        const { margin, panelGHeight, sideFlapWidth } = LAYOUT_CONSTANTS;
+
+        const y0 = margin;
+        const y1 = y0 + (D - (allowance - 1));
+        const y2 = y1 + H;
+        const y3 = y2 + H;
+        const y4 = y3 + D;
+        const y5 = y4 + H;
+        const y6 = y5 + H;
+        const y7 = y6 + panelGHeight;
+
+        const x0 = margin;
+        const x1 = x0 + sideFlapWidth;
+        const x2 = x1 + H;
+        const x3 = x2 + H;
+        const x4 = x3 + W;
+        const x5 = x4 + H;
+        const x6 = x5 + H;
+        const x7 = x6 + sideFlapWidth;
+
+        const p1p2 = {
+          width: H - allowance,
+          height: W - allowance,
+        };
+
+        const p3p4 = {
+          width: D - allowance,
+          height: H - allowance,
+        };
+
+        const flaps = {
+          p1: {
+            left: x4,
+            right: x4 + p1p2.width,
+            top: y3 - p1p2.height,
+            bottom: y3,
+          },
+          p2: {
+            left: x3 - p1p2.width,
+            right: x3,
+            top: y4,
+            bottom: y4 + p1p2.height,
+          },
+          p3: {
+            left: x3 - p3p4.width,
+            right: x3,
+            top: y3 - p3p4.height,
+            bottom: y3,
+          },
+          p4: {
+            left: x4,
+            right: x4 + p3p4.width,
+            top: y4,
+            bottom: y4 + p3p4.height,
+          },
+        };
+
+        const minX = Math.min(x0, flaps.p3.left);
+        const maxX = Math.max(x7, flaps.p4.right);
+        const minY = Math.min(y0, flaps.p1.top);
+        const maxY = Math.max(y7, flaps.p2.bottom);
+
+        return {
+          x: { x0, x1, x2, x3, x4, x5, x6, x7 },
+          y: { y0, y1, y2, y3, y4, y5, y6, y7 },
+          flaps,
+          viewBox: {
+            x: minX - margin,
+            y: minY - margin,
+            width: maxX - minX + margin * 2,
+            height: maxY - minY + margin * 2,
+          },
+        };
+      }
+
+      function buildFoldLines(layout) {
+        const { x, y, flaps } = layout;
+        const lines = [
+          { x1: x.x3, y1: y.y1, x2: x.x4, y2: y.y1, style: STYLES.fold.valley },
+          {
+            x1: x.x3,
+            y1: y.y2,
+            x2: x.x4,
+            y2: y.y2,
+            style: STYLES.fold.mountain,
+          },
+          {
+            x1: x.x3,
+            y1: y.y3,
+            x2: x.x4,
+            y2: y.y3,
+            style: STYLES.fold.mountain,
+          },
+          {
+            x1: x.x3,
+            y1: y.y4,
+            x2: x.x4,
+            y2: y.y4,
+            style: STYLES.fold.mountain,
+          },
+          {
+            x1: x.x3,
+            y1: y.y5,
+            x2: x.x4,
+            y2: y.y5,
+            style: STYLES.fold.mountain,
+          },
+          { x1: x.x3, y1: y.y6, x2: x.x4, y2: y.y6, style: STYLES.fold.valley },
+          { x1: x.x1, y1: y.y3, x2: x.x1, y2: y.y4, style: STYLES.fold.valley },
+          {
+            x1: x.x2,
+            y1: y.y3,
+            x2: x.x2,
+            y2: y.y4,
+            style: STYLES.fold.mountain,
+          },
+          {
+            x1: x.x5,
+            y1: y.y3,
+            x2: x.x5,
+            y2: y.y4,
+            style: STYLES.fold.mountain,
+          },
+          { x1: x.x6, y1: y.y3, x2: x.x6, y2: y.y4, style: STYLES.fold.valley },
+          {
+            x1: x.x3,
+            y1: y.y3,
+            x2: x.x3,
+            y2: y.y4,
+            style: STYLES.fold.mountain,
+          },
+          {
+            x1: x.x4,
+            y1: y.y3,
+            x2: x.x4,
+            y2: y.y4,
+            style: STYLES.fold.mountain,
+          },
+          {
+            x1: flaps.p1.left,
+            y1: y.y3,
+            x2: flaps.p1.right,
+            y2: y.y3,
+            style: STYLES.fold.mountain,
+          },
+          {
+            x1: flaps.p2.left,
+            y1: y.y4,
+            x2: flaps.p2.right,
+            y2: y.y4,
+            style: STYLES.fold.mountain,
+          },
+          {
+            x1: x.x3,
+            y1: flaps.p3.top,
+            x2: x.x3,
+            y2: flaps.p3.bottom,
+            style: STYLES.fold.mountain,
+          },
+          {
+            x1: x.x4,
+            y1: flaps.p4.top,
+            x2: x.x4,
+            y2: flaps.p4.bottom,
+            style: STYLES.fold.mountain,
+          },
+        ];
+
+        return lines
+          .map(({ x1, y1, x2, y2, style }) =>
+            createLineElement(x1, y1, x2, y2, style)
+          )
+          .join("\n");
+      }
+
+      function buildCutPath(layout) {
+        const { x, y, flaps } = layout;
+        const commands = [
+          `M ${x.x3},${y.y0}`,
+          `L ${x.x4},${y.y0}`,
+          `L ${x.x4},${y.y1}`,
+          `L ${x.x4},${y.y2}`,
+          `L ${x.x4},${y.y3}`,
+          `L ${flaps.p1.left},${y.y3}`,
+          `L ${flaps.p1.left},${flaps.p1.top}`,
+          `L ${flaps.p1.right},${flaps.p1.top}`,
+          `L ${flaps.p1.right},${y.y3}`,
+          `L ${x.x5},${y.y3}`,
+          `L ${x.x7},${y.y3}`,
+          `L ${x.x7},${y.y4}`,
+          `L ${x.x5},${y.y4}`,
+          `L ${x.x4},${y.y4}`,
+          `L ${x.x4},${flaps.p4.top}`,
+          `L ${flaps.p4.right},${flaps.p4.top}`,
+          `L ${flaps.p4.right},${flaps.p4.bottom}`,
+          `L ${x.x4},${flaps.p4.bottom}`,
+          `L ${x.x4},${y.y5}`,
+          `L ${x.x4},${y.y7}`,
+          `L ${x.x3},${y.y7}`,
+          `L ${x.x3},${y.y5}`,
+          `L ${x.x3},${y.y4}`,
+          `L ${flaps.p2.right},${y.y4}`,
+          `L ${flaps.p2.right},${flaps.p2.bottom}`,
+          `L ${flaps.p2.left},${flaps.p2.bottom}`,
+          `L ${flaps.p2.left},${y.y4}`,
+          `L ${x.x2},${y.y4}`,
+          `L ${x.x0},${y.y4}`,
+          `L ${x.x0},${y.y3}`,
+          `L ${x.x2},${y.y3}`,
+          `L ${x.x3},${y.y3}`,
+          `L ${x.x3},${flaps.p3.bottom}`,
+          `L ${flaps.p3.left},${flaps.p3.bottom}`,
+          `L ${flaps.p3.left},${flaps.p3.top}`,
+          `L ${x.x3},${flaps.p3.top}`,
+          `L ${x.x3},${y.y2}`,
+          `L ${x.x3},${y.y1}`,
+          `L ${x.x3},${y.y0}`,
+          "Z",
+        ];
+
+        return `<path d="${commands.join(" ")}" style="${STYLES.cut}" />`;
+      }
+
+      function buildLabels(layout, isLid) {
+        const { x, y, flaps } = layout;
+        const mid = (start, end) => (start + end) / 2;
+        const labels = [];
+
+        labels.push({
+          x: mid(x.x3, x.x4),
+          y: mid(y.y0, y.y1),
+          content: "inside",
+          style: STYLES.text.primary,
+          rotation: 180,
+        });
+
+        labels.push({
+          x: mid(x.x3, x.x4),
+          y: mid(y.y2, y.y3),
+          content: "front",
+          style: STYLES.text.primary,
+          rotation: isLid ? 180 : 0,
+        });
+
+        labels.push({
+          x: mid(x.x3, x.x4),
+          y: mid(y.y3, y.y4),
+          content: isLid ? "top" : "bottom",
+          style: STYLES.text.primary,
+        });
+
+        labels.push({
+          x: mid(x.x3, x.x4),
+          y: mid(y.y4, y.y5),
+          content: "back",
+          style: STYLES.text.primary,
+          rotation: isLid ? 0 : 180,
+        });
+
+        labels.push({
+          x: mid(x.x3, x.x4),
+          y: mid(y.y6, y.y7),
+          content: "tuck",
+          style: STYLES.text.muted,
+          rotation: 180,
+        });
+
+        labels.push({
+          x: mid(x.x0, x.x1),
+          y: mid(y.y3, y.y4),
+          content: "tuck",
+          style: STYLES.text.muted,
+          rotation: -90,
+        });
+
+        labels.push({
+          x: mid(x.x2, x.x3),
+          y: mid(y.y3, y.y4),
+          content: "left",
+          style: STYLES.text.primary,
+          rotation: isLid ? 90 : -90,
+        });
+
+        labels.push({
+          x: mid(x.x4, x.x5),
+          y: mid(y.y3, y.y4),
+          content: "right",
+          style: STYLES.text.primary,
+          rotation: isLid ? -90 : 90,
+        });
+
+        labels.push({
+          x: mid(x.x6, x.x7),
+          y: mid(y.y3, y.y4),
+          content: "tuck",
+          style: STYLES.text.muted,
+          rotation: 90,
+        });
+
+        labels.push({
+          x: mid(flaps.p1.left, flaps.p1.right),
+          y: mid(flaps.p1.top, flaps.p1.bottom),
+          content: "flap",
+          style: STYLES.text.muted,
+          rotation: 90,
+        });
+
+        labels.push({
+          x: mid(flaps.p2.left, flaps.p2.right),
+          y: mid(flaps.p2.top, flaps.p2.bottom),
+          content: "flap",
+          style: STYLES.text.muted,
+          rotation: -90,
+        });
+
+        labels.push({
+          x: mid(flaps.p3.left, flaps.p3.right),
+          y: mid(flaps.p3.top, flaps.p3.bottom),
+          content: "flap",
+          style: STYLES.text.muted,
+        });
+
+        labels.push({
+          x: mid(flaps.p4.left, flaps.p4.right),
+          y: mid(flaps.p4.top, flaps.p4.bottom),
+          content: "flap",
+          style: STYLES.text.muted,
+          rotation: 180,
+        });
+
+        return labels.map(createTextElement).join("\n");
+      }
+
+      function createBoxSVG(W, H, D, allowance, isLid, showLabels) {
+        const layout = computeLayout(W, H, D, allowance);
+        const foldLinesMarkup = buildFoldLines(layout);
+        const cutPathMarkup = buildCutPath(layout);
+        const layoutPathsMarkup = [foldLinesMarkup, cutPathMarkup]
+          .filter(Boolean)
+          .join("\n");
+        const labelMarkup = showLabels ? buildLabels(layout, isLid) : "";
+
+        return `
+                <svg 
+                    version="1.1"
+                    width="100%"
+                    height="100%"
+                    viewBox="${layout.viewBox.x} ${layout.viewBox.y} ${layout.viewBox.width} ${layout.viewBox.height}" 
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                    data-physical-width-mm="${layout.viewBox.width}"
+                    data-physical-height-mm="${layout.viewBox.height}"
+                >
+                    <desc>
+                        Layout: W=${W}, H=${H}, D=${D}, Allowance=${allowance}
+                        Black lines are for cutting.
+                        Solid light gray lines are for mountain folds.
+                        Dotted light gray lines are for valley folds.
+                    </desc>
+                    <g id="layout-paths">
+                        ${layoutPathsMarkup}
+                    </g>
+                    <g id="labels">
+                        ${labelMarkup}
+                    </g>
+                </svg>
+            `;
+      }
+
+      function downloadSVG(containerId, filename) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+          return;
+        }
+
+        const svg = container.querySelector("svg");
+        if (!svg) {
+          return;
+        }
+
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svg);
+        const blob = new Blob([svgString], {
+          type: "image/svg+xml;charset=utf-8",
+        });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+      }
+
+      function generateBox() {
+        const W = parseFloat(document.getElementById("width").value) || 61;
+        const H = parseFloat(document.getElementById("height").value) || 25;
+        const D = parseFloat(document.getElementById("depth").value) || 46;
+        const lidHeight =
+          parseFloat(document.getElementById("lidHeight").value) || 20;
+        const allowance =
+          parseFloat(document.getElementById("allowance").value) || 3;
+        const showLabels = document.getElementById("showLabels").checked;
+
+        const svgContainerBox = document.getElementById("svg-container-box");
+        const svgContainerLid = document.getElementById("svg-container-lid");
+
+        const boxSvgContent = createBoxSVG(
+          W,
+          H,
+          D,
+          allowance,
+          false,
+          showLabels
+        );
+        svgContainerBox.innerHTML = boxSvgContent;
+        const boxSvg = svgContainerBox.querySelector("svg");
+        if (boxSvg) {
+          const widthMm = parseFloat(
+            boxSvg.getAttribute("data-physical-width-mm") || "0"
+          );
+          const heightMm = parseFloat(
+            boxSvg.getAttribute("data-physical-height-mm") || "0"
+          );
+          if (widthMm && heightMm) {
+            boxSvg.style.width = `${widthMm * MM_TO_PX}px`;
+            boxSvg.style.height = `${heightMm * MM_TO_PX}px`;
+          }
+        }
+
+        const lidSvgContent = createBoxSVG(
+          W + allowance,
+          lidHeight,
+          D + allowance,
+          allowance,
+          true,
+          showLabels
+        );
+        svgContainerLid.innerHTML = lidSvgContent;
+        const lidSvg = svgContainerLid.querySelector("svg");
+        if (lidSvg) {
+          const widthMm = parseFloat(
+            lidSvg.getAttribute("data-physical-width-mm") || "0"
+          );
+          const heightMm = parseFloat(
+            lidSvg.getAttribute("data-physical-height-mm") || "0"
+          );
+          if (widthMm && heightMm) {
+            lidSvg.style.width = `${widthMm * MM_TO_PX}px`;
+            lidSvg.style.height = `${heightMm * MM_TO_PX}px`;
+          }
+        }
+      }
+
+      window.onload = function () {
+        generateBox();
+      };
+    </script>
+  </body>
+</html>
