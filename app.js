@@ -182,10 +182,11 @@ function getStyleConfig({ color }) {
   const prefersLightText = luminance < 0.5;
   const primaryColor = prefersLightText ? "#ffffff" : "#111827";
   const mutedColor = hexToRgba(primaryColor, prefersLightText ? 0.8 : 0.6);
+  const accentAdjustment = prefersLightText ? 0.2 : 0.25;
   const accentColor = adjustHexBrightness(
     workingColor,
     prefersLightText,
-    prefersLightText ? 0.5 : 0.35
+    accentAdjustment
   );
 
   base.text = {
