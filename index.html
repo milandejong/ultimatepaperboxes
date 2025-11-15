@@ -29,33 +29,85 @@
       .control-group label {
         display: block;
         font-weight: 600;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.35rem;
+        font-size: 0.95rem;
         color: #374151;
       }
-      .control-group input {
+      .control-group input,
+      .color-select,
+      .color-text-input,
+      .color-input,
+      .mini-control input {
         width: 100%;
-        padding: 0.5rem;
+        padding: 0.45rem 0.5rem;
         border: 1px solid #d1d5db;
         border-radius: 0.375rem;
-        font-size: 1rem;
+        font-size: 0.95rem;
+        background-color: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
       }
-      .control-group input:focus {
+      .control-group input:focus,
+      .mini-control input:focus,
+      .color-select:focus,
+      .color-text-input:focus,
+      .color-input:focus {
         outline: none;
         border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+      }
+      .color-input {
+        height: 2.5rem;
+        padding: 0.2rem;
+        cursor: pointer;
+      }
+      .color-control {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(120px, 0.9fr) minmax(
+            0,
+            1.1fr
+          );
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .color-select:disabled,
+      .color-text-input:disabled,
+      .color-input:disabled {
+        background-color: #f3f4f6;
+        cursor: not-allowed;
+      }
+      .inline-dimensions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .mini-control {
+        display: flex;
+        flex-direction: column;
+      }
+      .mini-control label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+        color: #4b5563;
+      }
+      .mini-control input {
+        font-size: 0.9rem;
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1rem;
       }
       .checkbox-group {
         display: flex;
         align-items: center;
-        margin-top: 1rem;
-      }
-      .checkbox-group input {
-        width: auto;
-        margin-right: 0.5rem;
-      }
-      .checkbox-group label {
-        margin: 0;
-        font-weight: 500;
+        gap: 0.5rem;
+        padding: 0.45rem 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        background-color: #f9fafb;
       }
       .generate-btn {
         width: 100%;
@@ -131,52 +183,90 @@
         margin-bottom: 1rem;
         color: #111827;
       }
+      .dimension-pair {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        align-items: end;
+      }
+      .dimension-link {
+        align-self: center;
+        justify-self: center;
+        font-size: 1.25rem;
+        color: #6b7280;
+        background: #f3f4f6;
+        border: 1px dashed #cbd5f5;
+        border-radius: 999px;
+        padding: 0.25rem 0.5rem;
+      }
     </style>
   </head>
   <body>
     <h1>Interactive Box Layout Generator</h1>
 
     <div class="controls-container">
-      <div class="control-group">
-        <label for="width">Box Width (W) in mm:</label>
-        <input type="number" id="width" value="61" min="10" />
+      <div class="inline-dimensions" aria-label="Primary dimensions">
+        <div class="mini-control">
+          <label for="width">Width</label>
+          <input type="number" id="width" value="61" min="10" />
+        </div>
+        <div class="mini-control">
+          <label for="depth">Depth</label>
+          <input type="number" id="depth" value="46" min="10" />
+        </div>
+        <div class="mini-control">
+          <label for="height">Height</label>
+          <input type="number" id="height" value="25" min="10" />
+        </div>
+        <div class="mini-control">
+          <label for="lidHeight">Lid Height</label>
+          <input type="number" id="lidHeight" value="20" min="10" />
+        </div>
+        <div class="mini-control">
+          <label
+            for="allowance"
+            title="Undersize amount that gives the paper room to fold"
+            >Fold Clearance</label
+          >
+          <input
+            type="number"
+            id="allowance"
+            value="3"
+            min="0"
+            max="10"
+            step="0.5"
+          />
+        </div>
       </div>
 
       <div class="control-group">
-        <label for="depth">Box Depth (D) in mm:</label>
-        <input type="number" id="depth" value="46" min="10" />
+        <label for="colorPreset">Exterior Color</label>
+        <div class="color-control">
+          <select id="colorPreset" class="color-select">
+            <option value="custom" selected>Custom Color</option>
+            <option value="transparent">Transparent</option>
+          </select>
+          <input
+            type="color"
+            id="boxColorPicker"
+            class="color-input"
+            value="#f97316"
+          />
+          <input
+            type="text"
+            id="boxColorText"
+            class="color-text-input"
+            placeholder="#f97316 or 'orange'"
+            value="#f97316"
+          />
+        </div>
       </div>
 
-      <div class="control-group">
-        <label for="height">Box Height (H) in mm:</label>
-        <input type="number" id="height" value="25" min="10" />
-      </div>
-
-      <div class="control-group">
-        <label for="lidHeight">Lid Height in mm:</label>
-        <input type="number" id="lidHeight" value="20" min="10" />
-      </div>
-
-      <div class="control-group">
-        <label for="allowance">Paper Allowance in mm:</label>
-        <input
-          type="number"
-          id="allowance"
-          value="3"
-          min="0"
-          max="10"
-          step="0.5"
-        />
-      </div>
-
-      <div class="checkbox-group">
-        <input type="checkbox" id="showLabels" checked />
-        <label for="showLabels">Show Panel Labels</label>
-      </div>
-
-      <button class="generate-btn" onclick="generateBox()">
-        Generate Box & Lid Layouts
-      </button>
+      <label class="checkbox-group" for="showLabels">
+        <input type="checkbox" id="showLabels" />
+        <span>Show Panel Labels</span>
+      </label>
     </div>
 
     <div class="preview-wrapper">
@@ -231,8 +321,159 @@
         },
       };
 
+      const COLOR_SETTINGS = {
+        bleed: 5,
+        panelOpacity: 1,
+        flapOpacity: 1,
+      };
+
+      function hexToRgb(hex) {
+        if (!hex) {
+          return null;
+        }
+        let normalized = hex.replace("#", "");
+        if (normalized.length === 3) {
+          normalized = normalized
+            .split("")
+            .map((char) => char + char)
+            .join("");
+        }
+        if (normalized.length !== 6 || Number.isNaN(parseInt(normalized, 16))) {
+          return null;
+        }
+        const value = parseInt(normalized, 16);
+        return {
+          r: (value >> 16) & 255,
+          g: (value >> 8) & 255,
+          b: value & 255,
+        };
+      }
+
+      function rgbToHex(r, g, b) {
+        const toHex = (channel) => {
+          const clamped = Math.max(0, Math.min(255, Math.round(channel)));
+          return clamped.toString(16).padStart(2, "0");
+        };
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+      }
+
+      function adjustHexBrightness(hex, lighten = true, amount = 0.35) {
+        const rgb = hexToRgb(hex);
+        if (!rgb) {
+          return hex;
+        }
+        const target = lighten ? 255 : 0;
+        const mix = (channel) => channel + (target - channel) * amount;
+        return rgbToHex(mix(rgb.r), mix(rgb.g), mix(rgb.b));
+      }
+
+      function getPerceivedLuminance(hex) {
+        const rgb = hexToRgb(hex);
+        if (!rgb) {
+          return 0;
+        }
+        const r = rgb.r / 255;
+        const g = rgb.g / 255;
+        const b = rgb.b / 255;
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      }
+
+      function getLidLineColor(hex) {
+        if (!hex) {
+          return "#000000";
+        }
+        const luminance = getPerceivedLuminance(hex);
+        const shouldLighten = luminance < 0.5;
+        const amount = shouldLighten ? 0.45 : 0.55;
+        return adjustHexBrightness(hex, shouldLighten, amount);
+      }
+
+      function hexToRgba(hex, alpha = 1) {
+        const rgb = hexToRgb(hex);
+        if (!rgb) {
+          return `rgba(0, 0, 0, ${alpha})`;
+        }
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+      }
+
+      function normalizeColorValue(value) {
+        if (value === null || value === undefined) {
+          return null;
+        }
+        const trimmed = `${value}`.trim();
+        if (!trimmed) {
+          return null;
+        }
+        if (!normalizeColorValue._ctx) {
+          const canvas = document.createElement("canvas");
+          normalizeColorValue._ctx = canvas.getContext("2d");
+        }
+        const ctx = normalizeColorValue._ctx;
+        if (!ctx) {
+          return trimmed;
+        }
+        const sentinel = "#010203";
+        ctx.fillStyle = sentinel;
+        ctx.fillStyle = trimmed;
+        const normalized = ctx.fillStyle;
+        if (!normalized) {
+          return null;
+        }
+        const lowerSentinel = sentinel.toLowerCase();
+        if (
+          normalized.toLowerCase() === lowerSentinel &&
+          trimmed.toLowerCase() !== lowerSentinel
+        ) {
+          return null;
+        }
+        return normalized;
+      }
+
+      function getStyleConfig({ color }) {
+        const base = {
+          cut: STYLES.cut,
+          fold: { ...STYLES.fold },
+          text: { ...STYLES.text },
+        };
+
+        if (!color) {
+          return base;
+        }
+
+        const lineColor = getLidLineColor(color);
+        const luminance = getPerceivedLuminance(color);
+        const shouldLighten = luminance < 0.5;
+        const valleyColor = adjustHexBrightness(
+          color,
+          true,
+          shouldLighten ? 0.45 : 0.25
+        );
+        const mountainColor = adjustHexBrightness(
+          color,
+          false,
+          shouldLighten ? 0.55 : 0.35
+        );
+        const mutedColor = hexToRgba(lineColor, 0.6);
+
+        base.text = {
+          primary: `fill:${lineColor}; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;`,
+          muted: `fill:${mutedColor}; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;`,
+        };
+
+        base.fold = {
+          mountain: `stroke:${mountainColor}; stroke-width:0.25; fill:none;`,
+          valley: `stroke:${valleyColor}; stroke-width:0.25; stroke-dasharray: 1 4; fill:none;`,
+        };
+
+        return base;
+      }
+
       function createLineElement(x1, y1, x2, y2, style) {
         return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="${style}" />`;
+      }
+
+      function createRectElement(x, y, width, height, style) {
+        return `<rect x="${x}" y="${y}" width="${width}" height="${height}" style="${style}" />`;
       }
 
       function createTextElement({ x, y, content, style, rotation }) {
@@ -318,96 +559,96 @@
         };
       }
 
-      function buildFoldLines(layout) {
+      function buildFoldLines(layout, styles = STYLES) {
         const { x, y, flaps } = layout;
         const lines = [
-          { x1: x.x3, y1: y.y1, x2: x.x4, y2: y.y1, style: STYLES.fold.valley },
+          { x1: x.x3, y1: y.y1, x2: x.x4, y2: y.y1, style: styles.fold.valley },
           {
             x1: x.x3,
             y1: y.y2,
             x2: x.x4,
             y2: y.y2,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
           {
             x1: x.x3,
             y1: y.y3,
             x2: x.x4,
             y2: y.y3,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
           {
             x1: x.x3,
             y1: y.y4,
             x2: x.x4,
             y2: y.y4,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
           {
             x1: x.x3,
             y1: y.y5,
             x2: x.x4,
             y2: y.y5,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
-          { x1: x.x3, y1: y.y6, x2: x.x4, y2: y.y6, style: STYLES.fold.valley },
-          { x1: x.x1, y1: y.y3, x2: x.x1, y2: y.y4, style: STYLES.fold.valley },
+          { x1: x.x3, y1: y.y6, x2: x.x4, y2: y.y6, style: styles.fold.valley },
+          { x1: x.x1, y1: y.y3, x2: x.x1, y2: y.y4, style: styles.fold.valley },
           {
             x1: x.x2,
             y1: y.y3,
             x2: x.x2,
             y2: y.y4,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
           {
             x1: x.x5,
             y1: y.y3,
             x2: x.x5,
             y2: y.y4,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
-          { x1: x.x6, y1: y.y3, x2: x.x6, y2: y.y4, style: STYLES.fold.valley },
+          { x1: x.x6, y1: y.y3, x2: x.x6, y2: y.y4, style: styles.fold.valley },
           {
             x1: x.x3,
             y1: y.y3,
             x2: x.x3,
             y2: y.y4,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
           {
             x1: x.x4,
             y1: y.y3,
             x2: x.x4,
             y2: y.y4,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
           {
             x1: flaps.p1.left,
             y1: y.y3,
             x2: flaps.p1.right,
             y2: y.y3,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
           {
             x1: flaps.p2.left,
             y1: y.y4,
             x2: flaps.p2.right,
             y2: y.y4,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
           {
             x1: x.x3,
             y1: flaps.p3.top,
             x2: x.x3,
             y2: flaps.p3.bottom,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
           {
             x1: x.x4,
             y1: flaps.p4.top,
             x2: x.x4,
             y2: flaps.p4.bottom,
-            style: STYLES.fold.mountain,
+            style: styles.fold.mountain,
           },
         ];
 
@@ -418,7 +659,7 @@
           .join("\n");
       }
 
-      function buildCutPath(layout) {
+      function buildCutPath(layout, styles = STYLES) {
         const { x, y, flaps } = layout;
         const commands = [
           `M ${x.x3},${y.y0}`,
@@ -463,27 +704,165 @@
           "Z",
         ];
 
-        return `<path d="${commands.join(" ")}" style="${STYLES.cut}" />`;
+        return `<path d="${commands.join(" ")}" style="${styles.cut}" />`;
       }
 
-      function buildLabels(layout, isLid) {
+      function buildColorPanels(
+        layout,
+        color,
+        { bleed = COLOR_SETTINGS.bleed, isLid = false } = {}
+      ) {
+        if (!color) {
+          return "";
+        }
+
+        const { x, y, flaps } = layout;
+        const panelStyle = `fill:${color}; fill-opacity:${COLOR_SETTINGS.panelOpacity}; stroke:none;`;
+        const flapStyle = `fill:${color}; fill-opacity:${COLOR_SETTINGS.flapOpacity}; stroke:none;`;
+        const rects = [];
+
+        const panelRects = [
+          {
+            id: "core",
+            x: x.x3,
+            y: y.y3,
+            width: x.x4 - x.x3,
+            height: y.y4 - y.y3,
+          },
+          {
+            id: "top",
+            x: x.x3,
+            y: y.y2,
+            width: x.x4 - x.x3,
+            height: y.y3 - y.y2,
+          },
+          {
+            id: "bottom",
+            x: x.x3,
+            y: y.y4,
+            width: x.x4 - x.x3,
+            height: y.y5 - y.y4,
+          },
+          {
+            id: "left",
+            x: x.x2,
+            y: y.y3,
+            width: x.x3 - x.x2,
+            height: y.y4 - y.y3,
+          },
+          {
+            id: "right",
+            x: x.x4,
+            y: y.y3,
+            width: x.x5 - x.x4,
+            height: y.y4 - y.y3,
+          },
+        ];
+
+        panelRects.forEach(({ id, x: px, y: py, width, height }) => {
+          if (!isLid && id === "core") {
+            return;
+          }
+          if (width > 0 && height > 0) {
+            rects.push(createRectElement(px, py, width, height, panelStyle));
+          }
+        });
+
+        const bleedDistance = Math.max(0, bleed);
+
+        if (flaps?.p1) {
+          const flapWidth = flaps.p1.right - flaps.p1.left;
+          const flapHeight = flaps.p1.bottom - flaps.p1.top;
+          const stripHeight = Math.min(bleedDistance, flapHeight);
+          if (flapWidth > 0 && stripHeight > 0) {
+            rects.push(
+              createRectElement(
+                flaps.p1.left,
+                flaps.p1.bottom - stripHeight,
+                flapWidth,
+                stripHeight,
+                flapStyle
+              )
+            );
+          }
+        }
+
+        if (flaps?.p2) {
+          const flapWidth = flaps.p2.right - flaps.p2.left;
+          const flapHeight = flaps.p2.bottom - flaps.p2.top;
+          const stripHeight = Math.min(bleedDistance, flapHeight);
+          if (flapWidth > 0 && stripHeight > 0) {
+            rects.push(
+              createRectElement(
+                flaps.p2.left,
+                flaps.p2.top,
+                flapWidth,
+                stripHeight,
+                flapStyle
+              )
+            );
+          }
+        }
+
+        if (flaps?.p3) {
+          const flapWidth = flaps.p3.right - flaps.p3.left;
+          const flapHeight = flaps.p3.bottom - flaps.p3.top;
+          const stripWidth = Math.min(bleedDistance, flapWidth);
+          if (flapHeight > 0 && stripWidth > 0) {
+            rects.push(
+              createRectElement(
+                flaps.p3.right - stripWidth,
+                flaps.p3.top,
+                stripWidth,
+                flapHeight,
+                flapStyle
+              )
+            );
+          }
+        }
+
+        if (flaps?.p4) {
+          const flapWidth = flaps.p4.right - flaps.p4.left;
+          const flapHeight = flaps.p4.bottom - flaps.p4.top;
+          const stripWidth = Math.min(bleedDistance, flapWidth);
+          if (flapHeight > 0 && stripWidth > 0) {
+            rects.push(
+              createRectElement(
+                flaps.p4.left,
+                flaps.p4.top,
+                stripWidth,
+                flapHeight,
+                flapStyle
+              )
+            );
+          }
+        }
+
+        return rects.join("\n");
+      }
+
+      function buildLabels(layout, isLid, styles = STYLES) {
         const { x, y, flaps } = layout;
         const mid = (start, end) => (start + end) / 2;
         const labels = [];
+        const accentPrimary = styles.text.primary;
+        const accentMuted = styles.text.muted;
+        const staticPrimary = STYLES.text.primary;
+        const staticMuted = STYLES.text.muted;
 
         labels.push({
           x: mid(x.x3, x.x4),
           y: mid(y.y0, y.y1),
           content: "inside",
-          style: STYLES.text.primary,
+          style: staticPrimary,
           rotation: 180,
         });
 
         labels.push({
           x: mid(x.x3, x.x4),
           y: mid(y.y2, y.y3),
-          content: "front",
-          style: STYLES.text.primary,
+          content: isLid ? "back" : "front",
+          style: accentPrimary,
           rotation: isLid ? 180 : 0,
         });
 
@@ -491,14 +870,14 @@
           x: mid(x.x3, x.x4),
           y: mid(y.y3, y.y4),
           content: isLid ? "top" : "bottom",
-          style: STYLES.text.primary,
+          style: isLid ? accentPrimary : staticPrimary,
         });
 
         labels.push({
           x: mid(x.x3, x.x4),
           y: mid(y.y4, y.y5),
-          content: "back",
-          style: STYLES.text.primary,
+          content: isLid ? "front" : "back",
+          style: accentPrimary,
           rotation: isLid ? 0 : 180,
         });
 
@@ -506,7 +885,7 @@
           x: mid(x.x3, x.x4),
           y: mid(y.y6, y.y7),
           content: "tuck",
-          style: STYLES.text.muted,
+          style: staticMuted,
           rotation: 180,
         });
 
@@ -514,7 +893,7 @@
           x: mid(x.x0, x.x1),
           y: mid(y.y3, y.y4),
           content: "tuck",
-          style: STYLES.text.muted,
+          style: staticMuted,
           rotation: -90,
         });
 
@@ -522,7 +901,7 @@
           x: mid(x.x2, x.x3),
           y: mid(y.y3, y.y4),
           content: "left",
-          style: STYLES.text.primary,
+          style: accentPrimary,
           rotation: isLid ? 90 : -90,
         });
 
@@ -530,7 +909,7 @@
           x: mid(x.x4, x.x5),
           y: mid(y.y3, y.y4),
           content: "right",
-          style: STYLES.text.primary,
+          style: accentPrimary,
           rotation: isLid ? -90 : 90,
         });
 
@@ -538,7 +917,7 @@
           x: mid(x.x6, x.x7),
           y: mid(y.y3, y.y4),
           content: "tuck",
-          style: STYLES.text.muted,
+          style: staticMuted,
           rotation: 90,
         });
 
@@ -546,7 +925,7 @@
           x: mid(flaps.p1.left, flaps.p1.right),
           y: mid(flaps.p1.top, flaps.p1.bottom),
           content: "flap",
-          style: STYLES.text.muted,
+          style: staticMuted,
           rotation: 90,
         });
 
@@ -554,7 +933,7 @@
           x: mid(flaps.p2.left, flaps.p2.right),
           y: mid(flaps.p2.top, flaps.p2.bottom),
           content: "flap",
-          style: STYLES.text.muted,
+          style: staticMuted,
           rotation: -90,
         });
 
@@ -562,28 +941,37 @@
           x: mid(flaps.p3.left, flaps.p3.right),
           y: mid(flaps.p3.top, flaps.p3.bottom),
           content: "flap",
-          style: STYLES.text.muted,
+          style: staticMuted,
         });
 
         labels.push({
           x: mid(flaps.p4.left, flaps.p4.right),
           y: mid(flaps.p4.top, flaps.p4.bottom),
           content: "flap",
-          style: STYLES.text.muted,
+          style: staticMuted,
           rotation: 180,
         });
 
         return labels.map(createTextElement).join("\n");
       }
 
-      function createBoxSVG(W, H, D, allowance, isLid, showLabels) {
+      function createBoxSVG(W, H, D, allowance, isLid, showLabels, color) {
         const layout = computeLayout(W, H, D, allowance);
-        const foldLinesMarkup = buildFoldLines(layout);
-        const cutPathMarkup = buildCutPath(layout);
+        const styles = getStyleConfig({ isLid, color });
+        const foldLinesMarkup = buildFoldLines(layout, styles);
+        const cutPathMarkup = buildCutPath(layout, styles);
         const layoutPathsMarkup = [foldLinesMarkup, cutPathMarkup]
           .filter(Boolean)
           .join("\n");
-        const labelMarkup = showLabels ? buildLabels(layout, isLid) : "";
+        const labelMarkup = showLabels
+          ? buildLabels(layout, isLid, styles)
+          : "";
+        const colorPanels = color
+          ? buildColorPanels(layout, color, {
+              bleed: COLOR_SETTINGS.bleed,
+              isLid,
+            })
+          : "";
         const widthMm = layout.viewBox.width;
         const heightMm = layout.viewBox.height;
 
@@ -592,18 +980,23 @@
                     version="1.1"
                     width="${widthMm}mm"
                     height="${heightMm}mm"
-                    viewBox="${layout.viewBox.x} ${layout.viewBox.y} ${layout.viewBox.width} ${layout.viewBox.height}" 
+                    viewBox="${layout.viewBox.x} ${layout.viewBox.y} ${
+          layout.viewBox.width
+        } ${layout.viewBox.height}" 
                     preserveAspectRatio="xMidYMid meet"
                     xmlns="http://www.w3.org/2000/svg"
                     data-physical-width-mm="${layout.viewBox.width}"
                     data-physical-height-mm="${layout.viewBox.height}"
                 >
                     <desc>
-                        Layout: W=${W}, H=${H}, D=${D}, Allowance=${allowance}
+                        Layout: W=${W}, H=${H}, D=${D}, Fold clearance=${allowance}
                         Black lines are for cutting.
                         Solid light gray lines are for mountain folds.
                         Dotted light gray lines are for valley folds.
                     </desc>
+                  ${
+                    colorPanels ? `<g id="color-panels">${colorPanels}</g>` : ""
+                  }
                     <g id="layout-paths">
                         ${layoutPathsMarkup}
                     </g>
@@ -645,15 +1038,100 @@
         URL.revokeObjectURL(url);
       }
 
+      const widthInput = document.getElementById("width");
+      const depthInput = document.getElementById("depth");
+      const heightInput = document.getElementById("height");
+      const lidHeightInput = document.getElementById("lidHeight");
+      const allowanceInput = document.getElementById("allowance");
+      const boxColorPicker = document.getElementById("boxColorPicker");
+      const boxColorText = document.getElementById("boxColorText");
+      const colorPresetSelect = document.getElementById("colorPreset");
+      const showLabelsInput = document.getElementById("showLabels");
+
+      function parseInputValue(input, fallback) {
+        const parsed = parseFloat(input?.value);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      }
+
+      function clampToInputMin(value, input) {
+        if (!input) {
+          return value;
+        }
+        const min = parseFloat(input.min);
+        if (Number.isFinite(min)) {
+          return Math.max(value, min);
+        }
+        return value;
+      }
+
+      function setNumericInputValue(input, value, fallback = 0) {
+        if (!input) {
+          return value;
+        }
+        const resolved = Number.isFinite(value) ? value : fallback;
+        const clamped = clampToInputMin(resolved, input);
+        const rounded = Math.round(clamped * 1000) / 1000;
+        input.value = `${rounded}`;
+        return rounded;
+      }
+
+      function setColorInputsEnabled(enabled) {
+        const shouldDisable = !enabled;
+        if (boxColorPicker) {
+          boxColorPicker.disabled = shouldDisable;
+        }
+        if (boxColorText) {
+          boxColorText.disabled = shouldDisable;
+        }
+      }
+
+      function resolveSelectedColor() {
+        const preset = colorPresetSelect?.value || "custom";
+        if (preset === "transparent") {
+          return null;
+        }
+        const manualValue = normalizeColorValue(boxColorText?.value);
+        if (manualValue) {
+          return manualValue;
+        }
+        const pickerValue = normalizeColorValue(boxColorPicker?.value);
+        if (pickerValue) {
+          return pickerValue;
+        }
+        return null;
+      }
+
+      function ensureCustomPreset() {
+        if (colorPresetSelect && colorPresetSelect.value === "transparent") {
+          colorPresetSelect.value = "custom";
+          setColorInputsEnabled(true);
+        }
+      }
+
+      function syncLinkedDimensions(trigger) {
+        const allowance = parseInputValue(allowanceInput, 3);
+        const baseWidth = parseInputValue(widthInput, 61);
+        setNumericInputValue(widthInput, baseWidth, 61);
+
+        const baseDepth = parseInputValue(depthInput, 46);
+        setNumericInputValue(depthInput, baseDepth, 46);
+
+        return {
+          lidWidth: baseWidth + allowance,
+          lidDepth: baseDepth + allowance,
+        };
+      }
+
       function generateBox() {
-        const W = parseFloat(document.getElementById("width").value) || 61;
-        const H = parseFloat(document.getElementById("height").value) || 25;
-        const D = parseFloat(document.getElementById("depth").value) || 46;
-        const lidHeight =
-          parseFloat(document.getElementById("lidHeight").value) || 20;
-        const allowance =
-          parseFloat(document.getElementById("allowance").value) || 3;
-        const showLabels = document.getElementById("showLabels").checked;
+        const { lidWidth, lidDepth } = syncLinkedDimensions();
+
+        const allowance = parseInputValue(allowanceInput, 3);
+        const W = parseInputValue(widthInput, 61);
+        const H = parseInputValue(heightInput, 25);
+        const D = parseInputValue(depthInput, 46);
+        const lidHeight = parseInputValue(lidHeightInput, 20);
+        const showLabels = Boolean(showLabelsInput?.checked);
+        const appliedColor = resolveSelectedColor();
 
         const svgContainerBox = document.getElementById("svg-container-box");
         const svgContainerLid = document.getElementById("svg-container-lid");
@@ -664,7 +1142,8 @@
           D,
           allowance,
           false,
-          showLabels
+          showLabels,
+          appliedColor
         );
         svgContainerBox.innerHTML = boxSvgContent;
         const boxSvg = svgContainerBox.querySelector("svg");
@@ -682,12 +1161,13 @@
         }
 
         const lidSvgContent = createBoxSVG(
-          W + allowance,
+          lidWidth,
           lidHeight,
-          D + allowance,
+          lidDepth,
           allowance,
           true,
-          showLabels
+          showLabels,
+          appliedColor
         );
         svgContainerLid.innerHTML = lidSvgContent;
         const lidSvg = svgContainerLid.querySelector("svg");
@@ -705,9 +1185,71 @@
         }
       }
 
-      window.onload = function () {
+      widthInput?.addEventListener("input", () => {
+        syncLinkedDimensions();
         generateBox();
-      };
+      });
+      depthInput?.addEventListener("input", () => {
+        syncLinkedDimensions();
+        generateBox();
+      });
+      heightInput?.addEventListener("input", () => {
+        generateBox();
+      });
+      lidHeightInput?.addEventListener("input", () => {
+        generateBox();
+      });
+      allowanceInput?.addEventListener("input", () => {
+        syncLinkedDimensions();
+        generateBox();
+      });
+
+      colorPresetSelect?.addEventListener("change", () => {
+        const enableCustom = colorPresetSelect.value !== "transparent";
+        setColorInputsEnabled(enableCustom);
+        generateBox();
+      });
+
+      boxColorPicker?.addEventListener("input", () => {
+        ensureCustomPreset();
+        if (boxColorText) {
+          boxColorText.value = boxColorPicker.value;
+        }
+        generateBox();
+      });
+
+      boxColorText?.addEventListener("input", () => {
+        ensureCustomPreset();
+        const normalized = normalizeColorValue(boxColorText.value);
+        if (normalized && normalized.startsWith("#") && boxColorPicker) {
+          boxColorPicker.value = normalized;
+        }
+        generateBox();
+      });
+
+      boxColorText?.addEventListener("blur", () => {
+        const normalized =
+          normalizeColorValue(boxColorText?.value) || boxColorPicker?.value;
+        if (normalized && boxColorText) {
+          boxColorText.value = normalized;
+        }
+        if (normalized && normalized.startsWith("#") && boxColorPicker) {
+          boxColorPicker.value = normalized;
+        }
+      });
+
+      showLabelsInput?.addEventListener("change", () => {
+        generateBox();
+      });
+
+      window.addEventListener("load", () => {
+        syncLinkedDimensions();
+        setColorInputsEnabled(colorPresetSelect?.value !== "transparent");
+        if (boxColorPicker && boxColorText && !boxColorText.value) {
+          boxColorText.value = boxColorPicker.value;
+        }
+        generateBox();
+      });
     </script>
   </body>
 </html>
