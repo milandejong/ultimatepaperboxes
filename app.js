@@ -7,17 +7,17 @@ const LAYOUT_CONSTANTS = {
 };
 
 const STYLES = {
-  cut: "stroke:black; stroke-width:0.25; fill:none;",
+  cut: "stroke:#000000; stroke-width:0.35; fill:none;",
   fold: {
-    mountain: "stroke:#CCCCCC; stroke-width:0.25; fill:none;",
+    mountain: "stroke:#d1d5db; stroke-width:0.25; fill:none;",
     valley:
-      "stroke:#CCCCCC; stroke-width:0.25; stroke-dasharray: 1 4; fill:none;",
+      "stroke:#d1d5db; stroke-width:0.25; stroke-dasharray: 1 4; fill:none;",
   },
   text: {
     primary:
-      "fill:black; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;",
+      "fill:#111827; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;",
     muted:
-      "fill:#CCCCCC; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;",
+      "fill:rgba(17, 24, 39, 0.6); font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;",
   },
 };
 
@@ -76,16 +76,6 @@ function getPerceivedLuminance(hex) {
   const g = rgb.g / 255;
   const b = rgb.b / 255;
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-function getLidLineColor(hex) {
-  if (!hex) {
-    return "#000000";
-  }
-  const luminance = getPerceivedLuminance(hex);
-  const shouldLighten = luminance < 0.5;
-  const amount = shouldLighten ? 0.45 : 0.55;
-  return adjustHexBrightness(hex, shouldLighten, amount);
 }
 
 function hexToRgba(hex, alpha = 1) {
@@ -186,29 +176,14 @@ function getStyleConfig({ color }) {
     return base;
   }
 
-  const lineColor = getLidLineColor(color);
   const luminance = getPerceivedLuminance(color);
-  const shouldLighten = luminance < 0.5;
-  const valleyColor = adjustHexBrightness(
-    color,
-    true,
-    shouldLighten ? 0.45 : 0.25
-  );
-  const mountainColor = adjustHexBrightness(
-    color,
-    false,
-    shouldLighten ? 0.55 : 0.35
-  );
-  const mutedColor = hexToRgba(lineColor, 0.6);
+  const prefersLightText = luminance < 0.5;
+  const primaryColor = prefersLightText ? "#ffffff" : "#111827";
+  const mutedColor = hexToRgba(primaryColor, prefersLightText ? 0.8 : 0.6);
 
   base.text = {
-    primary: `fill:${lineColor}; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;`,
+    primary: `fill:${primaryColor}; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;`,
     muted: `fill:${mutedColor}; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;`,
-  };
-
-  base.fold = {
-    mountain: `stroke:${mountainColor}; stroke-width:0.25; fill:none;`,
-    valley: `stroke:${valleyColor}; stroke-width:0.25; stroke-dasharray: 1 4; fill:none;`,
   };
 
   return base;
@@ -922,7 +897,9 @@ function setNumericInputValue(input, value, fallback = 0) {
   const resolved = Number.isFinite(value) ? value : fallback;
   const clamped = clampToInputMin(resolved, input);
   const rounded = Math.round(clamped * 1000) / 1000;
-  input.value = `${rounded}`;
+  if (document.activeElement !== input) {
+    input.value = `${rounded}`;
+  }
   return rounded;
 }
 
