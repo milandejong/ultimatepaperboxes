@@ -267,6 +267,15 @@
         <input type="checkbox" id="showLabels" />
         <span>Show Panel Labels</span>
       </label>
+
+      <label
+        class="checkbox-group"
+        for="inkSave"
+        title="Only color box sides up to where they won't be covered by the lid"
+      >
+        <input type="checkbox" id="inkSave" />
+        <span>Ink Save Mode</span>
+      </label>
     </div>
 
     <div class="preview-wrapper">
@@ -427,6 +436,52 @@
           return null;
         }
         return normalized;
+      }
+
+      function normalizeToHex(value) {
+        const normalized = normalizeColorValue(value);
+        if (!normalized) {
+          return { normalized: null, hex: null };
+        }
+
+        const trimmed = normalized.trim().toLowerCase();
+        const hexFromValue = (() => {
+          if (trimmed.startsWith("#")) {
+            if (trimmed.length === 4) {
+              const [, r, g, b] = trimmed;
+              return `#${r}${r}${g}${g}${b}${b}`;
+            }
+            if (trimmed.length === 7) {
+              return trimmed;
+            }
+            return null;
+          }
+
+          const rgbMatch = trimmed.match(
+            /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+)\s*)?\)$/
+          );
+          if (rgbMatch) {
+            const clampChannel = (component) => {
+              const channel = Math.round(parseFloat(component));
+              return Number.isFinite(channel)
+                ? Math.max(0, Math.min(255, channel))
+                : null;
+            };
+            const [r, g, b] = rgbMatch.slice(1, 4).map(clampChannel);
+            if ([r, g, b].some((channel) => channel === null)) {
+              return null;
+            }
+            const toHex = (channel) => channel.toString(16).padStart(2, "0");
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+          }
+
+          return null;
+        })();
+
+        return {
+          normalized,
+          hex: hexFromValue,
+        };
       }
 
       function getStyleConfig({ color }) {
@@ -710,7 +765,14 @@
       function buildColorPanels(
         layout,
         color,
-        { bleed = COLOR_SETTINGS.bleed, isLid = false } = {}
+        {
+          bleed = COLOR_SETTINGS.bleed,
+          isLid = false,
+          inkSave = false,
+          boxHeight = 0,
+          lidHeight = 0,
+          allowance = 0,
+        } = {}
       ) {
         if (!color) {
           return "";
@@ -763,8 +825,58 @@
           if (!isLid && id === "core") {
             return;
           }
-          if (width > 0 && height > 0) {
-            rects.push(createRectElement(px, py, width, height, panelStyle));
+
+          // For box sides with ink save mode, only color the visible portion
+          if (
+            !isLid &&
+            inkSave &&
+            (id === "left" || id === "right" || id === "top" || id === "bottom")
+          ) {
+            // Calculate the visible height from bottom: boxHeight - lidHeight + allowance
+            const visibleHeight = boxHeight - lidHeight + allowance;
+
+            if (id === "left") {
+              // Left panel: color from right edge (bottom when assembled)
+              const colorWidth = Math.min(visibleHeight, width);
+              if (colorWidth > 0 && height > 0) {
+                const colorX = px + width - colorWidth;
+                rects.push(
+                  createRectElement(colorX, py, colorWidth, height, panelStyle)
+                );
+              }
+            } else if (id === "right") {
+              // Right panel: color from left edge (bottom when assembled)
+              const colorWidth = Math.min(visibleHeight, width);
+              if (colorWidth > 0 && height > 0) {
+                rects.push(
+                  createRectElement(px, py, colorWidth, height, panelStyle)
+                );
+              }
+            } else if (id === "top") {
+              // Front panel, color from bottom up
+              const colorHeight = Math.min(visibleHeight, height);
+              if (width > 0 && colorHeight > 0) {
+                // Position from the bottom of the panel
+                const colorY = py + height - colorHeight;
+                rects.push(
+                  createRectElement(px, colorY, width, colorHeight, panelStyle)
+                );
+              }
+            } else if (id === "bottom") {
+              // Back panel, color from top down
+              const colorHeight = Math.min(visibleHeight, height);
+              if (width > 0 && colorHeight > 0) {
+                // Position from the top of the panel
+                rects.push(
+                  createRectElement(px, py, width, colorHeight, panelStyle)
+                );
+              }
+            }
+          } else {
+            // Normal mode or lid: color the entire panel
+            if (width > 0 && height > 0) {
+              rects.push(createRectElement(px, py, width, height, panelStyle));
+            }
           }
         });
 
@@ -773,13 +885,25 @@
         if (flaps?.p1) {
           const flapWidth = flaps.p1.right - flaps.p1.left;
           const flapHeight = flaps.p1.bottom - flaps.p1.top;
-          const stripHeight = Math.min(bleedDistance, flapHeight);
-          if (flapWidth > 0 && stripHeight > 0) {
+          let stripHeight = Math.min(bleedDistance, flapHeight);
+          let stripWidth = flapWidth; // Full width by default
+          let stripX = flaps.p1.left;
+
+          // In ink save mode for box, limit the width of the colored strip
+          if (!isLid && inkSave) {
+            const visibleHeight = boxHeight - lidHeight + allowance;
+            stripWidth = Math.min(visibleHeight, flapWidth);
+            stripX = flaps.p1.left; // Position from left in ink save mode
+          } else {
+            stripX = flaps.p1.right - stripWidth; // Position from right in normal mode
+          }
+
+          if (stripWidth > 0 && stripHeight > 0) {
             rects.push(
               createRectElement(
-                flaps.p1.left,
+                stripX,
                 flaps.p1.bottom - stripHeight,
-                flapWidth,
+                stripWidth,
                 stripHeight,
                 flapStyle
               )
@@ -790,13 +914,25 @@
         if (flaps?.p2) {
           const flapWidth = flaps.p2.right - flaps.p2.left;
           const flapHeight = flaps.p2.bottom - flaps.p2.top;
-          const stripHeight = Math.min(bleedDistance, flapHeight);
-          if (flapWidth > 0 && stripHeight > 0) {
+          let stripHeight = Math.min(bleedDistance, flapHeight);
+          let stripWidth = flapWidth; // Full width by default
+          let stripX = flaps.p2.left;
+
+          // In ink save mode for box, limit the width of the colored strip
+          if (!isLid && inkSave) {
+            const visibleHeight = boxHeight - lidHeight + allowance;
+            stripWidth = Math.min(visibleHeight, flapWidth);
+            stripX = flaps.p2.right - stripWidth; // Position from right in ink save mode
+          } else {
+            stripX = flaps.p2.left; // Position from left in normal mode
+          }
+
+          if (stripWidth > 0 && stripHeight > 0) {
             rects.push(
               createRectElement(
-                flaps.p2.left,
+                stripX,
                 flaps.p2.top,
-                flapWidth,
+                stripWidth,
                 stripHeight,
                 flapStyle
               )
@@ -807,14 +943,22 @@
         if (flaps?.p3) {
           const flapWidth = flaps.p3.right - flaps.p3.left;
           const flapHeight = flaps.p3.bottom - flaps.p3.top;
-          const stripWidth = Math.min(bleedDistance, flapWidth);
-          if (flapHeight > 0 && stripWidth > 0) {
+          let stripWidth = Math.min(bleedDistance, flapWidth);
+          let stripHeight = flapHeight; // Full height by default
+
+          // In ink save mode for box, limit the height of the colored strip
+          if (!isLid && inkSave) {
+            const visibleHeight = boxHeight - lidHeight + allowance;
+            stripHeight = Math.min(visibleHeight, flapHeight);
+          }
+
+          if (stripHeight > 0 && stripWidth > 0) {
             rects.push(
               createRectElement(
                 flaps.p3.right - stripWidth,
-                flaps.p3.top,
+                flaps.p3.bottom - stripHeight,
                 stripWidth,
-                flapHeight,
+                stripHeight,
                 flapStyle
               )
             );
@@ -824,14 +968,22 @@
         if (flaps?.p4) {
           const flapWidth = flaps.p4.right - flaps.p4.left;
           const flapHeight = flaps.p4.bottom - flaps.p4.top;
-          const stripWidth = Math.min(bleedDistance, flapWidth);
-          if (flapHeight > 0 && stripWidth > 0) {
+          let stripWidth = Math.min(bleedDistance, flapWidth);
+          let stripHeight = flapHeight; // Full height by default
+
+          // In ink save mode for box, limit the height of the colored strip
+          if (!isLid && inkSave) {
+            const visibleHeight = boxHeight - lidHeight + allowance;
+            stripHeight = Math.min(visibleHeight, flapHeight);
+          }
+
+          if (stripWidth > 0 && stripHeight > 0) {
             rects.push(
               createRectElement(
                 flaps.p4.left,
                 flaps.p4.top,
                 stripWidth,
-                flapHeight,
+                stripHeight,
                 flapStyle
               )
             );
@@ -955,7 +1107,18 @@
         return labels.map(createTextElement).join("\n");
       }
 
-      function createBoxSVG(W, H, D, allowance, isLid, showLabels, color) {
+      function createBoxSVG(
+        W,
+        H,
+        D,
+        allowance,
+        isLid,
+        showLabels,
+        color,
+        inkSave = false,
+        boxHeight = 0,
+        lidHeight = 0
+      ) {
         const layout = computeLayout(W, H, D, allowance);
         const styles = getStyleConfig({ isLid, color });
         const foldLinesMarkup = buildFoldLines(layout, styles);
@@ -970,6 +1133,10 @@
           ? buildColorPanels(layout, color, {
               bleed: COLOR_SETTINGS.bleed,
               isLid,
+              inkSave,
+              boxHeight,
+              lidHeight,
+              allowance,
             })
           : "";
         const widthMm = layout.viewBox.width;
@@ -1047,6 +1214,7 @@
       const boxColorText = document.getElementById("boxColorText");
       const colorPresetSelect = document.getElementById("colorPreset");
       const showLabelsInput = document.getElementById("showLabels");
+      const inkSaveInput = document.getElementById("inkSave");
 
       function parseInputValue(input, fallback) {
         const parsed = parseFloat(input?.value);
@@ -1131,6 +1299,7 @@
         const D = parseInputValue(depthInput, 46);
         const lidHeight = parseInputValue(lidHeightInput, 20);
         const showLabels = Boolean(showLabelsInput?.checked);
+        const inkSave = Boolean(inkSaveInput?.checked);
         const appliedColor = resolveSelectedColor();
 
         const svgContainerBox = document.getElementById("svg-container-box");
@@ -1143,7 +1312,10 @@
           allowance,
           false,
           showLabels,
-          appliedColor
+          appliedColor,
+          inkSave,
+          H,
+          lidHeight
         );
         svgContainerBox.innerHTML = boxSvgContent;
         const boxSvg = svgContainerBox.querySelector("svg");
@@ -1220,25 +1392,30 @@
 
       boxColorText?.addEventListener("input", () => {
         ensureCustomPreset();
-        const normalized = normalizeColorValue(boxColorText.value);
-        if (normalized && normalized.startsWith("#") && boxColorPicker) {
-          boxColorPicker.value = normalized;
+        const { hex } = normalizeToHex(boxColorText.value);
+        if (hex && boxColorPicker) {
+          boxColorPicker.value = hex;
         }
         generateBox();
       });
 
       boxColorText?.addEventListener("blur", () => {
-        const normalized =
-          normalizeColorValue(boxColorText?.value) || boxColorPicker?.value;
-        if (normalized && boxColorText) {
-          boxColorText.value = normalized;
-        }
-        if (normalized && normalized.startsWith("#") && boxColorPicker) {
-          boxColorPicker.value = normalized;
+        const { hex } = normalizeToHex(boxColorText?.value);
+        if (hex) {
+          if (boxColorText) {
+            boxColorText.value = hex;
+          }
+          if (boxColorPicker) {
+            boxColorPicker.value = hex;
+          }
         }
       });
 
       showLabelsInput?.addEventListener("change", () => {
+        generateBox();
+      });
+
+      inkSaveInput?.addEventListener("change", () => {
         generateBox();
       });
 
