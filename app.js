@@ -898,10 +898,21 @@ const boxColorPicker = document.getElementById("boxColorPicker");
 const boxColorText = document.getElementById("boxColorText");
 const colorPresetSelect = document.getElementById("colorPreset");
 const showLabelsInput = document.getElementById("showLabels");
-const debugLabelsInput = document.getElementById("debugLabels");
 const inkSaveInput = document.getElementById("inkSave");
 const svgContainerBox = document.getElementById("svg-container-box");
 const svgContainerLid = document.getElementById("svg-container-lid");
+
+const debugLabelsEnabled = (() => {
+  if (typeof window === "undefined" || typeof window.location === "undefined") {
+    return false;
+  }
+  try {
+    const params = new URLSearchParams(window.location.search || "");
+    return params.get("debug") === "1";
+  } catch (error) {
+    return false;
+  }
+})();
 
 let pendingRenderFrame = null;
 function scheduleGenerate() {
@@ -999,7 +1010,7 @@ function generateBox() {
   const D = parseInputValue(depthInput, 46);
   const lidHeight = parseInputValue(lidHeightInput, 20);
   const showLabels = Boolean(showLabelsInput?.checked);
-  const debugLabels = Boolean(debugLabelsInput?.checked);
+  const debugLabels = debugLabelsEnabled;
   const inkSave = Boolean(inkSaveInput?.checked);
   const appliedColor = resolveSelectedColor();
 
@@ -1108,7 +1119,6 @@ boxColorText?.addEventListener("blur", () => {
 });
 
 showLabelsInput?.addEventListener("change", scheduleGenerate);
-debugLabelsInput?.addEventListener("change", scheduleGenerate);
 
 inkSaveInput?.addEventListener("change", scheduleGenerate);
 
