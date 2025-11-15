@@ -176,15 +176,29 @@ function getStyleConfig({ color }) {
     return base;
   }
 
-  const luminance = getPerceivedLuminance(color);
+  const { hex: normalizedHex } = normalizeToHex(color);
+  const workingColor = normalizedHex || color;
+  const luminance = getPerceivedLuminance(workingColor);
   const prefersLightText = luminance < 0.5;
   const primaryColor = prefersLightText ? "#ffffff" : "#111827";
   const mutedColor = hexToRgba(primaryColor, prefersLightText ? 0.8 : 0.6);
+  const accentColor = adjustHexBrightness(
+    workingColor,
+    prefersLightText,
+    prefersLightText ? 0.5 : 0.35
+  );
 
   base.text = {
     primary: `fill:${primaryColor}; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;`,
     muted: `fill:${mutedColor}; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;`,
   };
+
+  if (accentColor) {
+    base.fold = {
+      ...base.fold,
+      accent: `stroke:${accentColor}; stroke-width:0.25; fill:none;`,
+    };
+  }
 
   return base;
 }
@@ -297,6 +311,7 @@ function buildFoldLines(layout, styles = STYLES) {
       x2: x.x4,
       y2: y.y3,
       style: styles.fold.mountain,
+      accent: true,
     },
     {
       x1: x.x3,
@@ -304,6 +319,7 @@ function buildFoldLines(layout, styles = STYLES) {
       x2: x.x4,
       y2: y.y4,
       style: styles.fold.mountain,
+      accent: true,
     },
     {
       x1: x.x3,
@@ -335,6 +351,7 @@ function buildFoldLines(layout, styles = STYLES) {
       x2: x.x3,
       y2: y.y4,
       style: styles.fold.mountain,
+      accent: true,
     },
     {
       x1: x.x4,
@@ -342,6 +359,7 @@ function buildFoldLines(layout, styles = STYLES) {
       x2: x.x4,
       y2: y.y4,
       style: styles.fold.mountain,
+      accent: true,
     },
     {
       x1: flaps.p1.left,
@@ -349,6 +367,7 @@ function buildFoldLines(layout, styles = STYLES) {
       x2: flaps.p1.right,
       y2: y.y3,
       style: styles.fold.mountain,
+      accent: true,
     },
     {
       x1: flaps.p2.left,
@@ -356,6 +375,7 @@ function buildFoldLines(layout, styles = STYLES) {
       x2: flaps.p2.right,
       y2: y.y4,
       style: styles.fold.mountain,
+      accent: true,
     },
     {
       x1: x.x3,
@@ -363,6 +383,7 @@ function buildFoldLines(layout, styles = STYLES) {
       x2: x.x3,
       y2: flaps.p3.bottom,
       style: styles.fold.mountain,
+      accent: true,
     },
     {
       x1: x.x4,
@@ -370,13 +391,16 @@ function buildFoldLines(layout, styles = STYLES) {
       x2: x.x4,
       y2: flaps.p4.bottom,
       style: styles.fold.mountain,
+      accent: true,
     },
   ];
 
   return lines
-    .map(({ x1, y1, x2, y2, style }) =>
-      createLineElement(x1, y1, x2, y2, style)
-    )
+    .map(({ x1, y1, x2, y2, style, accent }) => {
+      const appliedStyle =
+        accent && styles.fold?.accent ? styles.fold.accent : style;
+      return createLineElement(x1, y1, x2, y2, appliedStyle);
+    })
     .join("\n");
 }
 
@@ -642,7 +666,8 @@ function buildColorPanels(
   return rects.join("\n");
 }
 
-function buildLabels(layout, isLid, styles = STYLES) {
+function buildLabels(layout, isLid, styles = STYLES, options = {}) {
+  const { debugLabels = false } = options;
   const { x, y, flaps } = layout;
   const mid = (start, end) => (start + end) / 2;
   const labels = [];
@@ -753,7 +778,17 @@ function buildLabels(layout, isLid, styles = STYLES) {
     rotation: 180,
   });
 
-  return labels.map(createTextElement).join("\n");
+  const formattedLabels = labels.map((label, index) => {
+    if (!debugLabels) {
+      return label;
+    }
+    const sequenceIndex = index % 26;
+    const repeats = Math.floor(index / 26) + 1;
+    const letter = String.fromCharCode(65 + sequenceIndex).repeat(repeats);
+    return { ...label, content: letter };
+  });
+
+  return formattedLabels.map(createTextElement).join("\n");
 }
 
 function createBoxSVG({
@@ -763,6 +798,7 @@ function createBoxSVG({
   allowance,
   isLid = false,
   showLabels = false,
+  debugLabels = false,
   color = null,
   inkSave = false,
   boxHeight = 0,
@@ -775,7 +811,9 @@ function createBoxSVG({
   const layoutPathsMarkup = [foldLinesMarkup, cutPathMarkup]
     .filter(Boolean)
     .join("\n");
-  const labelMarkup = showLabels ? buildLabels(layout, isLid, styles) : "";
+  const labelMarkup = showLabels
+    ? buildLabels(layout, isLid, styles, { debugLabels })
+    : "";
   const colorPanels = color
     ? buildColorPanels(layout, color, {
         bleed: COLOR_SETTINGS.bleed,
@@ -859,6 +897,7 @@ const boxColorPicker = document.getElementById("boxColorPicker");
 const boxColorText = document.getElementById("boxColorText");
 const colorPresetSelect = document.getElementById("colorPreset");
 const showLabelsInput = document.getElementById("showLabels");
+const debugLabelsInput = document.getElementById("debugLabels");
 const inkSaveInput = document.getElementById("inkSave");
 const svgContainerBox = document.getElementById("svg-container-box");
 const svgContainerLid = document.getElementById("svg-container-lid");
@@ -959,6 +998,7 @@ function generateBox() {
   const D = parseInputValue(depthInput, 46);
   const lidHeight = parseInputValue(lidHeightInput, 20);
   const showLabels = Boolean(showLabelsInput?.checked);
+  const debugLabels = Boolean(debugLabelsInput?.checked);
   const inkSave = Boolean(inkSaveInput?.checked);
   const appliedColor = resolveSelectedColor();
 
@@ -969,6 +1009,7 @@ function generateBox() {
     allowance,
     isLid: false,
     showLabels,
+    debugLabels,
     color: appliedColor,
     inkSave,
     boxHeight: H,
@@ -996,6 +1037,7 @@ function generateBox() {
     allowance,
     isLid: true,
     showLabels,
+    debugLabels,
     color: appliedColor,
     inkSave: false,
     boxHeight: lidHeight,
@@ -1065,6 +1107,7 @@ boxColorText?.addEventListener("blur", () => {
 });
 
 showLabelsInput?.addEventListener("change", scheduleGenerate);
+debugLabelsInput?.addEventListener("change", scheduleGenerate);
 
 inkSaveInput?.addEventListener("change", scheduleGenerate);
 
