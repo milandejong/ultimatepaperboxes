@@ -1,6 +1,7 @@
 const MM_TO_PX = 3;
 const DECIMAL_PRECISION = 1;
 const DECIMAL_FACTOR = 10 ** DECIMAL_PRECISION;
+const LID_FIT_EXTRA = 0.3;
 
 const LAYOUT_CONSTANTS = {
   margin: 20,
@@ -1044,6 +1045,74 @@ function applyColorPreset(option) {
   scheduleGenerate();
 }
 
+function getSelectedOptionLabel(selectEl, fallback) {
+  if (!selectEl) {
+    return fallback;
+  }
+  const option = selectEl.selectedOptions?.[0];
+  if (!option) {
+    return fallback;
+  }
+  const label = option.textContent?.trim();
+  return label || fallback;
+}
+
+function describeCustomDimensions() {
+  const width = parseInputValue(widthInput, NaN);
+  const depth = parseInputValue(depthInput, NaN);
+  const height = parseInputValue(heightInput, NaN);
+  const lidHeight = parseInputValue(lidHeightInput, NaN);
+  if (
+    [width, depth, height, lidHeight].some((value) => !Number.isFinite(value))
+  ) {
+    return "Custom dimensions";
+  }
+  const format = (value) =>
+    (Math.round(value * DECIMAL_FACTOR) / DECIMAL_FACTOR)
+      .toFixed(DECIMAL_PRECISION)
+      .replace(/\.0$/, "");
+  return `${format(width)} x ${format(depth)} x ${format(height)} (lid ${format(
+    lidHeight
+  )})`;
+}
+
+function describeCustomColor() {
+  if (!useColorCheckbox?.checked) {
+    return "No color fill";
+  }
+  const hex = getActiveColorHex();
+  return hex ? hex.toUpperCase() : "Custom color";
+}
+
+function sanitizeFilenameSegment(text) {
+  if (!text) {
+    return "";
+  }
+  return text
+    .replace(/[\\/:*?"<>|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function buildDownloadFilename(type = "box") {
+  const dimensionLabel = dimensionPresetSelect?.value
+    ? getSelectedOptionLabel(dimensionPresetSelect, "Custom dimensions")
+    : describeCustomDimensions();
+  const colorLabel = colorPresetSelect?.value
+    ? getSelectedOptionLabel(colorPresetSelect, describeCustomColor())
+    : describeCustomColor();
+  const segments = [dimensionLabel, colorLabel];
+  if (type === "lid") {
+    segments.push("Lid layout");
+  }
+  const cleaned = segments
+    .map(sanitizeFilenameSegment)
+    .filter((segment) => segment.length > 0);
+  const fallback = type === "lid" ? "lid-layout" : "box-layout";
+  const base = cleaned.length > 0 ? cleaned.join(" - ") : fallback;
+  return `${base}.svg`;
+}
+
 const debugLabelsEnabled = (() => {
   if (typeof window === "undefined" || typeof window.location === "undefined") {
     return false;
@@ -1133,8 +1202,8 @@ function resolveSelectedColor() {
 }
 
 function syncLinkedDimensions() {
-  const allowance = parseInputValue(allowanceInput, 3);
-  setNumericInputValue(allowanceInput, allowance, 3);
+  const allowance = parseInputValue(allowanceInput, 1);
+  setNumericInputValue(allowanceInput, allowance, 1);
   const baseWidth = parseInputValue(widthInput, 61);
   setNumericInputValue(widthInput, baseWidth, 61);
 
@@ -1142,15 +1211,15 @@ function syncLinkedDimensions() {
   setNumericInputValue(depthInput, baseDepth, 46);
 
   return {
-    lidWidth: baseWidth + allowance,
-    lidDepth: baseDepth + allowance,
+    lidWidth: baseWidth + allowance + LID_FIT_EXTRA,
+    lidDepth: baseDepth + allowance + LID_FIT_EXTRA,
   };
 }
 
 function generateBox() {
   const { lidWidth, lidDepth } = syncLinkedDimensions();
 
-  const allowance = parseInputValue(allowanceInput, 3);
+  const allowance = parseInputValue(allowanceInput, 1);
   const W = parseInputValue(widthInput, 61);
   const H = parseInputValue(heightInput, 25);
   setNumericInputValue(heightInput, H, 25);

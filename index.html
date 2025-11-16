@@ -90,7 +90,7 @@
                 <input
                   type="number"
                   id="allowance"
-                  value="3"
+                  value="1"
                   min="0"
                   max="10"
                   step="0.1"
@@ -151,7 +151,7 @@
             </div>
             <div class="form-row">
               <label class="checkbox-option" for="inkSave">
-                <input type="checkbox" id="inkSave" />
+                <input type="checkbox" id="inkSave" checked />
                 Ink Save Mode
               </label>
             </div>
@@ -177,7 +177,7 @@
               <div id="svg-container-box"></div>
             </div>
             <button
-              onclick="downloadSVG('svg-container-box', 'box-layout.svg')"
+              onclick="downloadSVG('svg-container-box', buildDownloadFilename('box'))"
             >
               Download Box SVG
             </button>
@@ -188,7 +188,7 @@
               <div id="svg-container-lid"></div>
             </div>
             <button
-              onclick="downloadSVG('svg-container-lid', 'lid-layout.svg')"
+              onclick="downloadSVG('svg-container-lid', buildDownloadFilename('lid'))"
             >
               Download Lid SVG
             </button>
