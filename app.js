@@ -901,6 +901,43 @@ const showLabelsInput = document.getElementById("showLabels");
 const inkSaveInput = document.getElementById("inkSave");
 const svgContainerBox = document.getElementById("svg-container-box");
 const svgContainerLid = document.getElementById("svg-container-lid");
+const MAX_PREVIEW_MM = 100;
+
+function setupInteractiveColorPicker() {
+  if (!boxColorPicker) {
+    return;
+  }
+
+  if (typeof Coloris === "undefined") {
+    boxColorPicker.type = "color";
+    boxColorPicker.removeAttribute("data-coloris");
+    boxColorPicker.classList.add("native-color-picker");
+    return;
+  }
+
+  boxColorPicker.type = "text";
+  boxColorPicker.setAttribute("data-coloris", "");
+  boxColorPicker.classList.remove("native-color-picker");
+
+  Coloris({
+    el: "#boxColorPicker",
+    themeMode: "auto",
+    formatToggle: true,
+    format: "hex",
+    swatches: [
+      "#f97316",
+      "#facc15",
+      "#10b981",
+      "#3b82f6",
+      "#6366f1",
+      "#a855f7",
+      "#ec4899",
+      "#ef4444",
+      "#111827",
+      "#ffffff",
+    ],
+  });
+}
 
 const debugLabelsEnabled = (() => {
   if (typeof window === "undefined" || typeof window.location === "undefined") {
@@ -964,6 +1001,17 @@ function setColorInputsEnabled(enabled) {
   }
 }
 
+function updateInkSaveAvailability() {
+  if (!inkSaveInput) {
+    return;
+  }
+  const disableInkSave = colorPresetSelect?.value === "transparent";
+  inkSaveInput.disabled = disableInkSave;
+  if (disableInkSave) {
+    inkSaveInput.checked = false;
+  }
+}
+
 function resolveSelectedColor() {
   const preset = colorPresetSelect?.value || "custom";
   if (preset === "transparent") {
@@ -984,6 +1032,7 @@ function ensureCustomPreset() {
   if (colorPresetSelect && colorPresetSelect.value === "transparent") {
     colorPresetSelect.value = "custom";
     setColorInputsEnabled(true);
+    updateInkSaveAvailability();
   }
 }
 
@@ -1029,18 +1078,7 @@ function generateBox() {
   });
   svgContainerBox.innerHTML = boxSvgContent;
   const boxSvg = svgContainerBox.querySelector("svg");
-  if (boxSvg) {
-    const widthMm = parseFloat(
-      boxSvg.getAttribute("data-physical-width-mm") || "0"
-    );
-    const heightMm = parseFloat(
-      boxSvg.getAttribute("data-physical-height-mm") || "0"
-    );
-    if (widthMm && heightMm) {
-      boxSvg.style.width = `${widthMm * MM_TO_PX}px`;
-      boxSvg.style.height = `${heightMm * MM_TO_PX}px`;
-    }
-  }
+  sizeSvgPreview(boxSvg);
 
   const lidSvgContent = createBoxSVG({
     width: lidWidth,
@@ -1057,18 +1095,26 @@ function generateBox() {
   });
   svgContainerLid.innerHTML = lidSvgContent;
   const lidSvg = svgContainerLid.querySelector("svg");
-  if (lidSvg) {
-    const widthMm = parseFloat(
-      lidSvg.getAttribute("data-physical-width-mm") || "0"
-    );
-    const heightMm = parseFloat(
-      lidSvg.getAttribute("data-physical-height-mm") || "0"
-    );
-    if (widthMm && heightMm) {
-      lidSvg.style.width = `${widthMm * MM_TO_PX}px`;
-      lidSvg.style.height = `${heightMm * MM_TO_PX}px`;
-    }
+  sizeSvgPreview(lidSvg);
+}
+
+function sizeSvgPreview(svgEl) {
+  if (!svgEl) {
+    return;
   }
+  const widthMm = parseFloat(
+    svgEl.getAttribute("data-physical-width-mm") || "0"
+  );
+  const heightMm = parseFloat(
+    svgEl.getAttribute("data-physical-height-mm") || "0"
+  );
+  if (!(widthMm && heightMm)) {
+    return;
+  }
+  const largestMm = Math.max(widthMm, heightMm);
+  const scale = largestMm > MAX_PREVIEW_MM ? MAX_PREVIEW_MM / largestMm : 1;
+  svgEl.style.width = `${widthMm * MM_TO_PX * scale}px`;
+  svgEl.style.height = `${heightMm * MM_TO_PX * scale}px`;
 }
 
 const numericInputs = [
@@ -1086,6 +1132,7 @@ numericInputs.forEach((input) => {
 colorPresetSelect?.addEventListener("change", () => {
   const enableCustom = colorPresetSelect.value !== "transparent";
   setColorInputsEnabled(enableCustom);
+  updateInkSaveAvailability();
   scheduleGenerate();
 });
 
@@ -1123,8 +1170,10 @@ showLabelsInput?.addEventListener("change", scheduleGenerate);
 inkSaveInput?.addEventListener("change", scheduleGenerate);
 
 window.addEventListener("load", () => {
+  setupInteractiveColorPicker();
   syncLinkedDimensions();
   setColorInputsEnabled(colorPresetSelect?.value !== "transparent");
+  updateInkSaveAvailability();
   if (boxColorPicker && boxColorText && !boxColorText.value) {
     boxColorText.value = boxColorPicker.value;
   }
