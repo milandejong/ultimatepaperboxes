@@ -24,7 +24,7 @@ const STYLES = {
 };
 
 const COLOR_SETTINGS = {
-  bleed: 5,
+  bleed: 10,
   panelOpacity: 1,
   flapOpacity: 1,
 };
