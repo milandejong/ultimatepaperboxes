@@ -3,6 +3,112 @@ const DECIMAL_PRECISION = 1;
 const DECIMAL_FACTOR = 10 ** DECIMAL_PRECISION;
 const LID_FIT_EXTRA = 0.3;
 
+// Preset data configuration
+const DIMENSION_PRESETS = [
+  {
+    id: "carc-40-tiles",
+    name: "Carcassonne 40 tile box",
+    width: 89.6,
+    depth: 46,
+    height: 46,
+    lidHeight: 23,
+  },
+  {
+    id: "carc-meeple",
+    name: "Carcassonne meeple box",
+    width: 59.6,
+    depth: 46,
+    height: 46,
+    lidHeight: 23,
+  },
+  {
+    id: "agri-player-cards",
+    name: "Agricola player/cards/tiles",
+    width: 91,
+    depth: 61,
+    height: 21,
+    lidHeight: 13,
+  },
+  {
+    id: "agri-resources",
+    name: "Agricola resources",
+    width: 42,
+    depth: 61,
+    height: 21,
+    lidHeight: 13,
+  },
+  {
+    id: "quacks-tokens",
+    name: "Quacks of Quedlinburg tokens",
+    width: 83.5,
+    depth: 42.5,
+    height: 25,
+    lidHeight: 13,
+  },
+  {
+    id: "quacks-cards",
+    name: "Quacks of Quedlinburg cards",
+    width: 90,
+    depth: 58,
+    height: 24,
+    lidHeight: 13,
+  },
+];
+
+const COLOR_PRESETS = [
+  // Carcassonne colors
+  { id: "carc-black", name: "Carcassonne black meeple", color: "#424042" },
+  { id: "carc-red", name: "Carcassonne red meeple", color: "#de2735" },
+  { id: "carc-green", name: "Carcassonne green meeple", color: "#38803d" },
+  { id: "carc-pink", name: "Carcassonne pink meeple", color: "#de89b9" },
+  { id: "carc-blue", name: "Carcassonne blue meeple", color: "#245aa5" },
+  { id: "carc-yellow", name: "Carcassonne yellow meeple", color: "#fde306" },
+
+  // Agricola colors
+  { id: "agri-major", name: "Agricola major improvements", color: "#97162c" },
+  { id: "agri-minor", name: "Agricola minor improvements", color: "#c59b20" },
+  { id: "agri-occupations", name: "Agricola occupations", color: "#cac50d" },
+  { id: "agri-vegetable", name: "Agricola vegetable", color: "#fab131" },
+  { id: "agri-clay", name: "Agricola clay", color: "#b6754d" },
+  { id: "agri-reed", name: "Agricola reed", color: "#cfd0cf" },
+  { id: "agri-wool", name: "Agricola wool", color: "#d7d1b0" },
+  { id: "agri-wood", name: "Agricola wood", color: "#946a5b" },
+  { id: "agri-stone", name: "Agricola stone", color: "#52514f" },
+  { id: "agri-wild-boar", name: "Agricola wild boar", color: "#0e100d" },
+  { id: "agri-grain", name: "Agricola grain", color: "#f5df3e" },
+  { id: "agri-cattle", name: "Agricola cattle", color: "#8b6e5f" },
+  { id: "agri-fields", name: "Agricola fields", color: "#c9c04a" },
+  { id: "agri-stone-tiles", name: "Agricola stone tiles", color: "#e0b843" },
+  { id: "agri-extras", name: "Agricola extras", color: "#addb6f" },
+
+  // Quacks of Quedlinburg colors
+  { id: "quacks-red", name: "Quacks Red player", color: "#E02327" },
+  { id: "quacks-blue", name: "Quacks Blue player", color: "#2462AE" },
+  { id: "quacks-green", name: "Quacks Green player", color: "#51B852" },
+  { id: "quacks-yellow", name: "Quacks Yellow player", color: "#D3B22C" },
+  { id: "quacks-black", name: "Quacks Black player", color: "#464B57" },
+  { id: "quacks-gems", name: "Quacks Gems", color: "#E42168" },
+  { id: "quacks-pumpkins", name: "Quacks Pumpkins", color: "#FAA532" },
+  { id: "quacks-toadstool", name: "Quacks Toadstool", color: "#EE352E" },
+  {
+    id: "quacks-garden-spider",
+    name: "Quacks Garden Spider",
+    color: "#56BA57",
+  },
+  { id: "quacks-crow-skull", name: "Quacks Crow Skull", color: "#2C8CAF" },
+  { id: "quacks-mandrake", name: "Quacks Mandrake", color: "#F7ED46" },
+  { id: "quacks-hawkmoth", name: "Quacks Hawkmoth", color: "#3C455E" },
+  { id: "quacks-ghost-breath", name: "Quacks Ghost' Breath", color: "#A553A0" },
+  { id: "quacks-locoweed", name: "Quacks Locoweed", color: "#90C996" },
+  { id: "quacks-cherry-bombs", name: "Quacks Cherry Bombs", color: "#DBF0F3" },
+  {
+    id: "quacks-fortune-teller",
+    name: "Quacks Fortune Teller Cards",
+    color: "#6E3577",
+  },
+  { id: "quacks-patients", name: "Quacks Patients", color: "#8FC3DB" },
+];
+
 const LAYOUT_CONSTANTS = {
   margin: 20,
   panelGHeight: 10,
@@ -962,6 +1068,9 @@ function syncDimensionPresetSelection() {
     }
   );
   dimensionPresetSelect.value = matchingOption ? matchingOption.value : "";
+  if (window.syncPresetChipStates) {
+    window.syncPresetChipStates();
+  }
 }
 
 function setPresetNumericValue(input, value) {
@@ -1022,6 +1131,9 @@ function syncColorPresetSelection() {
     return optionHex ? optionHex === activeHex : false;
   });
   colorPresetSelect.value = match ? match.value : "";
+  if (window.syncPresetChipStates) {
+    window.syncPresetChipStates();
+  }
 }
 
 function applyColorPreset(option) {
@@ -1172,6 +1284,9 @@ function setColorInputsEnabled(enabled) {
   if (boxColorText) {
     boxColorText.disabled = shouldDisable;
   }
+  if (colorPresetSelect) {
+    colorPresetSelect.disabled = shouldDisable;
+  }
 }
 
 function updateInkSaveAvailability() {
@@ -1180,9 +1295,7 @@ function updateInkSaveAvailability() {
   }
   const disableInkSave = useColorCheckbox ? !useColorCheckbox.checked : false;
   inkSaveInput.disabled = disableInkSave;
-  if (disableInkSave) {
-    inkSaveInput.checked = false;
-  }
+  // Don't change the checked state - let user's selection persist
 }
 
 function resolveSelectedColor() {
@@ -1248,6 +1361,14 @@ function generateBox() {
   });
   svgContainerBox.innerHTML = boxSvgContent;
   const boxSvg = svgContainerBox.querySelector("svg");
+  if (boxSvg) {
+    boxSvg.classList.add("fade-in");
+    boxSvg.addEventListener(
+      "animationend",
+      () => boxSvg.classList.remove("fade-in"),
+      { once: true }
+    );
+  }
   sizeSvgPreview(boxSvg);
 
   const lidSvgContent = createBoxSVG({
@@ -1266,6 +1387,14 @@ function generateBox() {
   });
   svgContainerLid.innerHTML = lidSvgContent;
   const lidSvg = svgContainerLid.querySelector("svg");
+  if (lidSvg) {
+    lidSvg.classList.add("fade-in");
+    lidSvg.addEventListener(
+      "animationend",
+      () => lidSvg.classList.remove("fade-in"),
+      { once: true }
+    );
+  }
   sizeSvgPreview(lidSvg);
   syncDimensionPresetSelection();
   syncColorPresetSelection();
@@ -1378,12 +1507,102 @@ showLabelsInput?.addEventListener("change", scheduleGenerate);
 
 inkSaveInput?.addEventListener("change", scheduleGenerate);
 
+// Preset chip interactions
+function initPresetChips() {
+  const dimensionChips = document.querySelectorAll(
+    "#dimensionChips .preset-chip"
+  );
+  const colorChips = document.querySelectorAll("#colorChips .preset-chip");
+
+  // Sync chip active states with dropdown selections
+  function syncChipStates() {
+    dimensionChips.forEach((chip) => {
+      const presetValue = chip.dataset.preset;
+      chip.classList.toggle(
+        "active",
+        dimensionPresetSelect?.value === presetValue
+      );
+    });
+
+    colorChips.forEach((chip) => {
+      const presetValue = chip.dataset.preset;
+      chip.classList.toggle("active", colorPresetSelect?.value === presetValue);
+    });
+  }
+
+  // Expose globally for sync functions
+  window.syncPresetChipStates = syncChipStates;
+
+  // Handle dimension chip clicks
+  dimensionChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const presetValue = chip.dataset.preset;
+      if (dimensionPresetSelect) {
+        dimensionPresetSelect.value = presetValue;
+        dimensionPresetSelect.dispatchEvent(new Event("change"));
+      }
+      syncChipStates();
+    });
+  });
+
+  // Handle color chip clicks
+  colorChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const presetValue = chip.dataset.preset;
+      if (colorPresetSelect) {
+        colorPresetSelect.value = presetValue;
+        colorPresetSelect.dispatchEvent(new Event("change"));
+      }
+      syncChipStates();
+    });
+  });
+
+  // Sync on dropdown changes
+  dimensionPresetSelect?.addEventListener("change", syncChipStates);
+  colorPresetSelect?.addEventListener("change", syncChipStates);
+
+  // Initial sync
+  syncChipStates();
+}
+
+function populatePresetDropdowns() {
+  // Populate dimension presets
+  if (dimensionPresetSelect) {
+    dimensionPresetSelect.innerHTML =
+      '<option value="">Custom dimensions</option>';
+    DIMENSION_PRESETS.forEach((preset) => {
+      const option = document.createElement("option");
+      option.value = preset.id;
+      option.textContent = preset.name;
+      option.dataset.width = preset.width;
+      option.dataset.depth = preset.depth;
+      option.dataset.height = preset.height;
+      option.dataset.lidHeight = preset.lidHeight;
+      dimensionPresetSelect.appendChild(option);
+    });
+  }
+
+  // Populate color presets
+  if (colorPresetSelect) {
+    colorPresetSelect.innerHTML = '<option value="">Custom color</option>';
+    COLOR_PRESETS.forEach((preset) => {
+      const option = document.createElement("option");
+      option.value = preset.id;
+      option.textContent = preset.name;
+      option.dataset.color = preset.color;
+      colorPresetSelect.appendChild(option);
+    });
+  }
+}
+
 window.addEventListener("load", () => {
+  populatePresetDropdowns();
   syncLinkedDimensions();
   setColorInputsEnabled(Boolean(useColorCheckbox?.checked));
   updateInkSaveAvailability();
   if (boxColorPicker && boxColorText && !boxColorText.value) {
     boxColorText.value = boxColorPicker.value;
   }
+  initPresetChips();
   generateBox();
 });

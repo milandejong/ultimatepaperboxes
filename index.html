@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ultimate Paper Box Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -11,233 +17,141 @@
     <main class="layout">
       <section class="inputs-panel">
         <div class="inputs">
-          <div class="form-section">
-            <h3>Dimensions</h3>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="dimensionPreset">Dimension presets</label>
-                <select id="dimensionPreset">
-                  <option value="">Custom dimensions</option>
-                  <option
-                    value="carc-40-tiles"
-                    data-width="89.6"
-                    data-depth="46"
-                    data-height="46"
-                    data-lid-height="23"
-                  >
-                    Carcassonne 40 tile box
-                  </option>
-                  <option
-                    value="carc-meeple"
-                    data-width="59.6"
-                    data-depth="46"
-                    data-height="46"
-                    data-lid-height="23"
-                  >
-                    Carcassonne meeple box
-                  </option>
-                  <option
-                    value="agri-player-cards"
-                    data-width="91"
-                    data-depth="61"
-                    data-height="21"
-                    data-lid-height="13"
-                  >
-                    Agricola player/cards/tiles
-                  </option>
-                  <option
-                    value="agri-resources"
-                    data-width="42"
-                    data-depth="61"
-                    data-height="21"
-                    data-lid-height="13"
-                  >
-                    Agricola resources
-                  </option>
-                </select>
+          <div class="card">
+            <div class="form-section">
+              <h3>Dimensions</h3>
+              <div class="form-row">
+                <div class="form-field">
+                  <select id="dimensionPreset">
+                    <!-- Options populated dynamically by JavaScript -->
+                  </select>
+                </div>
               </div>
-            </div>
-            <div class="form-row cols-4">
-              <div class="form-field">
-                <label for="width">Width (mm)</label>
-                <input
-                  type="number"
-                  id="width"
-                  value="61"
-                  min="10"
-                  step="0.1"
-                />
-              </div>
+              <div class="form-row cols-3">
+                <div class="form-field">
+                  <label for="width">Width (mm)</label>
+                  <input
+                    type="number"
+                    id="width"
+                    value="61"
+                    min="10"
+                    step="0.1"
+                  />
+                </div>
 
-              <div class="form-field">
-                <label for="depth">Depth (mm)</label>
-                <input
-                  type="number"
-                  id="depth"
-                  value="46"
-                  min="10"
-                  step="0.1"
-                />
-              </div>
+                <div class="form-field">
+                  <label for="depth">Depth (mm)</label>
+                  <input
+                    type="number"
+                    id="depth"
+                    value="46"
+                    min="10"
+                    step="0.1"
+                  />
+                </div>
 
-              <div class="form-field">
-                <label for="height">Height (mm)</label>
-                <input
-                  type="number"
-                  id="height"
-                  value="25"
-                  min="10"
-                  step="0.1"
-                />
+                <div class="form-field">
+                  <label for="height">Height (mm)</label>
+                  <input
+                    type="number"
+                    id="height"
+                    value="25"
+                    min="10"
+                    step="0.1"
+                  />
+                </div>
               </div>
-            </div>
-            <div class="form-row cols-2">
-              <div class="form-field">
-                <label for="lidHeight">Lid Height (mm)</label>
-                <input
-                  type="number"
-                  id="lidHeight"
-                  value="20"
-                  min="10"
-                  step="0.1"
-                />
+              <div class="form-row cols-3">
+                <div></div>
+                <div></div>
+                <div class="form-field">
+                  <label for="lidHeight">Lid Height (mm)</label>
+                  <input
+                    type="number"
+                    id="lidHeight"
+                    value="20"
+                    min="10"
+                    step="0.1"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="form-section">
-            <h3>Color</h3>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="colorPreset">Color presets</label>
-                <select id="colorPreset">
-                  <option value="">Custom color</option>
-                  <option value="carc-black" data-color="#424042">
-                    Carcassonne black meeple
-                  </option>
-              <div class="form-field">
-                  </option>
-                  <option value="carc-green" data-color="#38803d">
-                    Carcassonne green meeple
-                  </option>
-                  <option value="carc-pink" data-color="#de89b9">
-                    Carcassonne pink meeple
-                  </option>
-                  <option value="carc-blue" data-color="#245aa5">
-                    Carcassonne blue meeple
-                  </option>
-                  <option value="carc-yellow" data-color="#fde306">
-                    Carcassonne yellow meeple
-                  </option>
-                  <option value="agri-major" data-color="#97162c">
-                    Agricola major improvements
-                  </option>
-                  <option value="agri-minor" data-color="#c59b20">
-                    Agricola minor improvements
-                  </option>
-                  <option value="agri-occupations" data-color="#cac50d">
-                    Agricola occupations
-                  </option>
-                  <option value="agri-vegetable" data-color="#fab131">
-                    Agricola vegetable
-                  </option>
-                  <option value="agri-clay" data-color="#b6754d">
-                    Agricola clay
-                  </option>
-                  <option value="agri-reed" data-color="#cfd0cf">
-                    Agricola reed
-                  </option>
-                  <option value="agri-wool" data-color="#d7d1b0">
-                    Agricola wool
-                  </option>
-                  <option value="agri-wood" data-color="#946a5b">
-                    Agricola wood
-                  </option>
-                  <option value="agri-stone" data-color="#52514f">
-                    Agricola stone
-                  </option>
-                  <option value="agri-wild-boar" data-color="#0e100d">
-                    Agricola wild boar
-                  </option>
-                  <option value="agri-grain" data-color="#f5df3e">
-                    Agricola grain
-                  </option>
-                  <option value="agri-cattle" data-color="#8b6e5f">
-                    Agricola cattle
-                  </option>
-                  <option value="agri-fields" data-color="#c9c04a">
-                    Agricola fields
-                  </option>
-                  <option value="agri-stone-tiles" data-color="#e0b843">
-                    Agricola stone tiles
-                  </option>
-                  <option value="agri-extras" data-color="#addb6f">
-                    Agricola extras
-                  </option>
-                </select>
+          <div class="card">
+            <div class="form-section">
+              <h3>Color</h3>
+              <div class="form-row">
+                <label class="checkbox-option" for="useColor">
+                  <input type="checkbox" id="useColor" checked />
+                  Use color fill
+                </label>
               </div>
-            </div>
-            <div class="form-row">
-              <label class="checkbox-option" for="useColor">
-                <input type="checkbox" id="useColor" checked />
-                Use color fill
-              </label>
-            </div>
-            <div class="form-row cols-2">
-              <div class="form-field">
-                <label for="boxColorPicker">Color Picker</label>
-                <input type="color" id="boxColorPicker" value="#f97316" />
+              <div class="form-row">
+                <div class="form-field">
+                  <select id="colorPreset">
+                    <!-- Options populated dynamically by JavaScript -->
+                  </select>
+                </div>
               </div>
+              <div class="form-row cols-2">
+                <div class="form-field">
+                  <label for="boxColorPicker">Color Picker</label>
+                  <input type="color" id="boxColorPicker" value="#f97316" />
+                </div>
 
-              <div class="form-field">
-                <label for="boxColorText">HTML code</label>
-                <input
-                  type="text"
-                  id="boxColorText"
-                  value="#f97316"
-                  placeholder="#f97316 or 'orange'"
-                />
+                <div class="form-field">
+                  <label for="boxColorText">HTML code</label>
+                  <input
+                    type="text"
+                    id="boxColorText"
+                    value="#f97316"
+                    placeholder="#f97316 or 'orange'"
+                  />
+                </div>
               </div>
-            </div>
-            <div class="form-row">
-              <label class="checkbox-option" for="inkSave">
-                <input type="checkbox" id="inkSave" checked />
-                Ink Save Mode
-              </label>
+              <div class="form-row">
+                <label class="checkbox-option" for="inkSave">
+                  <input type="checkbox" id="inkSave" checked />
+                  Ink Save Mode
+                </label>
+              </div>
             </div>
           </div>
 
-          <div class="form-section">
-            <h3>Advanced</h3>
-            <div class="form-row cols-2">
-              <div class="form-field">
-                <label for="allowance">Fold Clearance (mm)</label>
-                <input
-                  type="number"
-                  id="allowance"
-                  value="1"
-                  min="0"
-                  max="10"
-                  step="0.1"
-                />
+          <div class="card">
+            <div class="form-section">
+              <h3>Advanced</h3>
+              <div class="form-row cols-2">
+                <div class="form-field">
+                  <label for="allowance">Fold Clearance (mm)</label>
+                  <input
+                    type="number"
+                    id="allowance"
+                    value="1"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                  />
+                </div>
+                <div class="form-field">
+                  <label for="bleed">Bleed (mm)</label>
+                  <input
+                    type="number"
+                    id="bleed"
+                    value="4"
+                    min="0"
+                    max="20"
+                    step="0.1"
+                  />
+                </div>
               </div>
-              <div class="form-field">
-                <label for="bleed">Bleed (mm)</label>
-                <input
-                  type="number"
-                  id="bleed"
-                  value="4"
-                  min="0"
-                  max="20"
-                  step="0.1"
-                />
+              <div class="form-row">
+                <label class="checkbox-option" for="showLabels">
+                  <input type="checkbox" id="showLabels" />
+                  Show Panel Labels
+                </label>
               </div>
-            </div>
-            <div class="form-row">
-              <label class="checkbox-option" for="showLabels">
-                <input type="checkbox" id="showLabels" />
-                Show Panel Labels
-              </label>
             </div>
           </div>
         </div>
@@ -245,7 +159,7 @@
 
       <section class="preview-panel">
         <div class="previews">
-          <div>
+          <div class="card">
             <h3>Box Layout</h3>
             <div class="preview-area">
               <div id="svg-container-box"></div>
@@ -256,7 +170,7 @@
               Download Box SVG
             </button>
           </div>
-          <div>
+          <div class="card">
             <h3>Lid Layout</h3>
             <div class="preview-area">
               <div id="svg-container-lid"></div>
