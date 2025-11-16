@@ -1,6 +1,6 @@
 body {
   font-family: system-ui, sans-serif;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
 }
@@ -10,10 +10,22 @@ h1 {
   margin-bottom: 1rem;
 }
 
-main {
+main.layout {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 1.5rem;
+}
+
+.inputs-panel {
+  flex: 0 0 320px;
+  max-width: 360px;
+  width: 100%;
+}
+
+.preview-panel {
+  flex: 1 1 520px;
+  width: 100%;
 }
 
 section {
@@ -25,23 +37,51 @@ section {
 .inputs {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1.25rem;
 }
 
-.inputs label {
+.form-section {
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.form-row {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form-row.cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form-row.cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.form-field label {
   font-size: 0.9rem;
 }
 
-.inputs input,
-.inputs select {
-  margin-top: 0.25rem;
+.form-field input,
+.form-field select {
   padding: 0.4rem;
   font-size: 0.9rem;
 }
 
 .inputs .checkbox-option {
+  display: flex;
   flex-direction: row;
   align-items: center;
   gap: 0.5rem;
@@ -54,6 +94,7 @@ section {
 
 .previews {
   display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
   gap: 1rem;
 }
 
@@ -61,4 +102,19 @@ section {
   border: 1px dashed #bbb;
   min-height: 200px;
   padding: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  main.layout {
+    flex-direction: column;
+  }
+
+  .previews {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row.cols-3,
+  .form-row.cols-2 {
+    grid-template-columns: 1fr;
+  }
 }
