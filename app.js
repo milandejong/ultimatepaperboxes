@@ -25,7 +25,7 @@ const STYLES = {
 };
 
 const COLOR_SETTINGS = {
-  bleed: 10,
+  bleed: 4,
   panelOpacity: 1,
   flapOpacity: 1,
 };
@@ -477,6 +477,11 @@ function buildColorPanels(
   const panelStyle = `fill:${color}; fill-opacity:${COLOR_SETTINGS.panelOpacity}; stroke:none;`;
   const flapStyle = `fill:${color}; fill-opacity:${COLOR_SETTINGS.flapOpacity}; stroke:none;`;
   const rects = [];
+  const bleedDistance = Math.max(0, bleed);
+  const visibleInkSaveHeight = Math.max(
+    0,
+    boxHeight - lidHeight + bleedDistance
+  );
 
   const panelRects = [
     {
@@ -526,10 +531,8 @@ function buildColorPanels(
       inkSave &&
       (id === "left" || id === "right" || id === "top" || id === "bottom")
     ) {
-      const visibleHeight = boxHeight - lidHeight + allowance;
-
       if (id === "left") {
-        const colorWidth = Math.min(visibleHeight, width);
+        const colorWidth = Math.min(visibleInkSaveHeight, width);
         if (colorWidth > 0 && height > 0) {
           const colorX = px + width - colorWidth;
           rects.push(
@@ -537,12 +540,12 @@ function buildColorPanels(
           );
         }
       } else if (id === "right") {
-        const colorWidth = Math.min(visibleHeight, width);
+        const colorWidth = Math.min(visibleInkSaveHeight, width);
         if (colorWidth > 0 && height > 0) {
           rects.push(createRectElement(px, py, colorWidth, height, panelStyle));
         }
       } else if (id === "top") {
-        const colorHeight = Math.min(visibleHeight, height);
+        const colorHeight = Math.min(visibleInkSaveHeight, height);
         if (width > 0 && colorHeight > 0) {
           const colorY = py + height - colorHeight;
           rects.push(
@@ -550,7 +553,7 @@ function buildColorPanels(
           );
         }
       } else if (id === "bottom") {
-        const colorHeight = Math.min(visibleHeight, height);
+        const colorHeight = Math.min(visibleInkSaveHeight, height);
         if (width > 0 && colorHeight > 0) {
           rects.push(createRectElement(px, py, width, colorHeight, panelStyle));
         }
@@ -562,8 +565,6 @@ function buildColorPanels(
     }
   });
 
-  const bleedDistance = Math.max(0, bleed);
-
   if (flaps?.p1) {
     const flapWidth = flaps.p1.right - flaps.p1.left;
     const flapHeight = flaps.p1.bottom - flaps.p1.top;
@@ -572,8 +573,7 @@ function buildColorPanels(
     let stripX = flaps.p1.left;
 
     if (!isLid && inkSave) {
-      const visibleHeight = boxHeight - lidHeight + allowance;
-      stripWidth = Math.min(visibleHeight, flapWidth);
+      stripWidth = Math.min(visibleInkSaveHeight, flapWidth);
       stripX = flaps.p1.left;
     } else {
       stripX = flaps.p1.right - stripWidth;
@@ -600,8 +600,7 @@ function buildColorPanels(
     let stripX = flaps.p2.left;
 
     if (!isLid && inkSave) {
-      const visibleHeight = boxHeight - lidHeight + allowance;
-      stripWidth = Math.min(visibleHeight, flapWidth);
+      stripWidth = Math.min(visibleInkSaveHeight, flapWidth);
       stripX = flaps.p2.right - stripWidth;
     } else {
       stripX = flaps.p2.left;
@@ -627,8 +626,7 @@ function buildColorPanels(
     let stripHeight = flapHeight;
 
     if (!isLid && inkSave) {
-      const visibleHeight = boxHeight - lidHeight + allowance;
-      stripHeight = Math.min(visibleHeight, flapHeight);
+      stripHeight = Math.min(visibleInkSaveHeight, flapHeight);
     }
 
     if (stripHeight > 0 && stripWidth > 0) {
@@ -651,8 +649,7 @@ function buildColorPanels(
     let stripHeight = flapHeight;
 
     if (!isLid && inkSave) {
-      const visibleHeight = boxHeight - lidHeight + allowance;
-      stripHeight = Math.min(visibleHeight, flapHeight);
+      stripHeight = Math.min(visibleInkSaveHeight, flapHeight);
     }
 
     if (stripWidth > 0 && stripHeight > 0) {
@@ -801,6 +798,7 @@ function createBoxSVG({
   height,
   depth,
   allowance,
+  bleed = COLOR_SETTINGS.bleed,
   isLid = false,
   showLabels = false,
   debugLabels = false,
@@ -821,7 +819,7 @@ function createBoxSVG({
     : "";
   const colorPanels = color
     ? buildColorPanels(layout, color, {
-        bleed: COLOR_SETTINGS.bleed,
+        bleed,
         isLid,
         inkSave,
         boxHeight,
@@ -898,6 +896,7 @@ const depthInput = document.getElementById("depth");
 const heightInput = document.getElementById("height");
 const lidHeightInput = document.getElementById("lidHeight");
 const allowanceInput = document.getElementById("allowance");
+const bleedInput = document.getElementById("bleed");
 const boxColorPicker = document.getElementById("boxColorPicker");
 const boxColorText = document.getElementById("boxColorText");
 const useColorCheckbox = document.getElementById("useColor");
@@ -1220,6 +1219,8 @@ function generateBox() {
   const { lidWidth, lidDepth } = syncLinkedDimensions();
 
   const allowance = parseInputValue(allowanceInput, 1);
+  const bleedValue = parseInputValue(bleedInput, COLOR_SETTINGS.bleed);
+  setNumericInputValue(bleedInput, bleedValue, COLOR_SETTINGS.bleed);
   const W = parseInputValue(widthInput, 61);
   const H = parseInputValue(heightInput, 25);
   setNumericInputValue(heightInput, H, 25);
@@ -1236,6 +1237,7 @@ function generateBox() {
     height: H,
     depth: D,
     allowance,
+    bleed: bleedValue,
     isLid: false,
     showLabels,
     debugLabels,
@@ -1253,6 +1255,7 @@ function generateBox() {
     height: lidHeight,
     depth: lidDepth,
     allowance,
+    bleed: bleedValue,
     isLid: true,
     showLabels,
     debugLabels,
@@ -1293,6 +1296,7 @@ const numericInputs = [
   heightInput,
   lidHeightInput,
   allowanceInput,
+  bleedInput,
 ];
 
 numericInputs.forEach((input) => {
