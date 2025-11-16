@@ -13,6 +13,32 @@
         <div class="inputs">
           <div class="form-section">
             <h3>Dimensions</h3>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="dimensionPreset">Dimension presets</label>
+                <select id="dimensionPreset">
+                  <option value="">Custom dimensions</option>
+                  <option
+                    value="carc-40-tiles"
+                    data-width="89.6"
+                    data-depth="46"
+                    data-height="46"
+                    data-lid-height="23"
+                  >
+                    Carcassonne 40 tile box
+                  </option>
+                  <option
+                    value="carc-meeple"
+                    data-width="59.6"
+                    data-depth="46"
+                    data-height="46"
+                    data-lid-height="23"
+                  >
+                    Carcassonne meeple box
+                  </option>
+                </select>
+              </div>
+            </div>
             <div class="form-row cols-3">
               <div class="form-field">
                 <label for="width">Width (mm)</label>
@@ -75,6 +101,32 @@
 
           <div class="form-section">
             <h3>Color</h3>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="colorPreset">Color presets</label>
+                <select id="colorPreset">
+                  <option value="">Custom color</option>
+                  <option value="carc-black" data-color="#424042">
+                    Carcassonne black meeple
+                  </option>
+                  <option value="carc-red" data-color="#d51f26">
+                    Carcassonne red meeple
+                  </option>
+                  <option value="carc-green" data-color="#38803d">
+                    Carcassonne green meeple
+                  </option>
+                  <option value="carc-pink" data-color="#de89b9">
+                    Carcassonne pink meeple
+                  </option>
+                  <option value="carc-blue" data-color="#245aa5">
+                    Carcassonne blue meeple
+                  </option>
+                  <option value="carc-yellow" data-color="#fde306">
+                    Carcassonne yellow meeple
+                  </option>
+                </select>
+              </div>
+            </div>
             <div class="form-row">
               <label class="checkbox-option" for="useColor">
                 <input type="checkbox" id="useColor" checked />

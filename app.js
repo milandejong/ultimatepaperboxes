@@ -28,6 +28,7 @@ const COLOR_SETTINGS = {
   panelOpacity: 1,
   flapOpacity: 1,
 };
+const DIMENSION_MATCH_TOLERANCE = 0.05;
 
 function hexToRgb(hex) {
   if (!hex) {
@@ -901,9 +902,147 @@ const boxColorText = document.getElementById("boxColorText");
 const useColorCheckbox = document.getElementById("useColor");
 const showLabelsInput = document.getElementById("showLabels");
 const inkSaveInput = document.getElementById("inkSave");
+const dimensionPresetSelect = document.getElementById("dimensionPreset");
+const colorPresetSelect = document.getElementById("colorPreset");
 const svgContainerBox = document.getElementById("svg-container-box");
 const svgContainerLid = document.getElementById("svg-container-lid");
 const MAX_PREVIEW_MM = 100;
+
+function parsePresetNumber(option, key) {
+  if (!option?.dataset?.[key]) {
+    return null;
+  }
+  const value = parseFloat(option.dataset[key]);
+  return Number.isFinite(value) ? value : null;
+}
+
+function extractDimensionPreset(option) {
+  if (!option) {
+    return null;
+  }
+  const width = parsePresetNumber(option, "width");
+  const depth = parsePresetNumber(option, "depth");
+  const height = parsePresetNumber(option, "height");
+  const lidHeight = parsePresetNumber(option, "lidHeight");
+  if ([width, depth, height, lidHeight].some((value) => value === null)) {
+    return null;
+  }
+  return { width, depth, height, lidHeight };
+}
+
+function approxEqual(a, b, tolerance = DIMENSION_MATCH_TOLERANCE) {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) {
+    return false;
+  }
+  return Math.abs(a - b) <= tolerance;
+}
+
+function syncDimensionPresetSelection() {
+  if (!dimensionPresetSelect) {
+    return;
+  }
+  const current = {
+    width: parseInputValue(widthInput, NaN),
+    depth: parseInputValue(depthInput, NaN),
+    height: parseInputValue(heightInput, NaN),
+    lidHeight: parseInputValue(lidHeightInput, NaN),
+  };
+  const matchingOption = Array.from(dimensionPresetSelect.options).find(
+    (option) => {
+      const preset = extractDimensionPreset(option);
+      if (!preset) {
+        return false;
+      }
+      return (
+        approxEqual(current.width, preset.width) &&
+        approxEqual(current.depth, preset.depth) &&
+        approxEqual(current.height, preset.height) &&
+        approxEqual(current.lidHeight, preset.lidHeight)
+      );
+    }
+  );
+  dimensionPresetSelect.value = matchingOption ? matchingOption.value : "";
+}
+
+function setPresetNumericValue(input, value) {
+  if (!input || !Number.isFinite(value)) {
+    return;
+  }
+  const rounded = Math.round(value * DECIMAL_FACTOR) / DECIMAL_FACTOR;
+  input.value = rounded.toFixed(DECIMAL_PRECISION);
+}
+
+function applyDimensionPreset(option) {
+  const preset = extractDimensionPreset(option);
+  if (!preset) {
+    return;
+  }
+  setPresetNumericValue(widthInput, preset.width);
+  setPresetNumericValue(depthInput, preset.depth);
+  setPresetNumericValue(heightInput, preset.height);
+  setPresetNumericValue(lidHeightInput, preset.lidHeight);
+  syncDimensionPresetSelection();
+  scheduleGenerate();
+}
+
+function getOptionHex(option) {
+  const raw = option?.dataset?.color;
+  if (!raw) {
+    return null;
+  }
+  const { hex } = normalizeToHex(raw);
+  return hex ? hex.toLowerCase() : null;
+}
+
+function getActiveColorHex() {
+  const fromText = boxColorText ? normalizeToHex(boxColorText.value) : null;
+  if (fromText?.hex) {
+    return fromText.hex.toLowerCase();
+  }
+  const fromPicker = boxColorPicker
+    ? normalizeToHex(boxColorPicker.value)
+    : null;
+  if (fromPicker?.hex) {
+    return fromPicker.hex.toLowerCase();
+  }
+  return null;
+}
+
+function syncColorPresetSelection() {
+  if (!colorPresetSelect) {
+    return;
+  }
+  const activeHex = getActiveColorHex();
+  if (!activeHex) {
+    colorPresetSelect.value = "";
+    return;
+  }
+  const match = Array.from(colorPresetSelect.options).find((option) => {
+    const optionHex = getOptionHex(option);
+    return optionHex ? optionHex === activeHex : false;
+  });
+  colorPresetSelect.value = match ? match.value : "";
+}
+
+function applyColorPreset(option) {
+  const presetHex = getOptionHex(option);
+  if (!presetHex) {
+    return;
+  }
+  if (useColorCheckbox) {
+    useColorCheckbox.checked = true;
+  }
+  setColorInputsEnabled(true);
+  updateInkSaveAvailability();
+  if (boxColorPicker) {
+    boxColorPicker.value = presetHex;
+  }
+  if (boxColorText) {
+    boxColorText.value = presetHex;
+  }
+  syncColorPresetSelection();
+  scheduleGenerate();
+}
 
 const debugLabelsEnabled = (() => {
   if (typeof window === "undefined" || typeof window.location === "undefined") {
@@ -1056,6 +1195,8 @@ function generateBox() {
   svgContainerLid.innerHTML = lidSvgContent;
   const lidSvg = svgContainerLid.querySelector("svg");
   sizeSvgPreview(lidSvg);
+  syncDimensionPresetSelection();
+  syncColorPresetSelection();
 }
 
 function sizeSvgPreview(svgEl) {
@@ -1086,13 +1227,29 @@ const numericInputs = [
 ];
 
 numericInputs.forEach((input) => {
-  input?.addEventListener("input", scheduleGenerate);
+  input?.addEventListener("input", () => {
+    if (
+      dimensionPresetSelect &&
+      (input === widthInput ||
+        input === depthInput ||
+        input === heightInput ||
+        input === lidHeightInput)
+    ) {
+      dimensionPresetSelect.value = "";
+    }
+    scheduleGenerate();
+  });
 });
 
 useColorCheckbox?.addEventListener("change", () => {
   const enableCustom = Boolean(useColorCheckbox.checked);
   setColorInputsEnabled(enableCustom);
   updateInkSaveAvailability();
+  if (!enableCustom && colorPresetSelect) {
+    colorPresetSelect.value = "";
+  } else {
+    syncColorPresetSelection();
+  }
   scheduleGenerate();
 });
 
@@ -1100,6 +1257,7 @@ boxColorPicker?.addEventListener("input", () => {
   if (boxColorText) {
     boxColorText.value = boxColorPicker.value;
   }
+  syncColorPresetSelection();
   scheduleGenerate();
 });
 
@@ -1108,6 +1266,7 @@ boxColorText?.addEventListener("input", () => {
   if (hex && boxColorPicker) {
     boxColorPicker.value = hex;
   }
+  syncColorPresetSelection();
   scheduleGenerate();
 });
 
@@ -1120,6 +1279,25 @@ boxColorText?.addEventListener("blur", () => {
     if (boxColorPicker) {
       boxColorPicker.value = hex;
     }
+  }
+  syncColorPresetSelection();
+});
+
+dimensionPresetSelect?.addEventListener("change", () => {
+  const option = dimensionPresetSelect.selectedOptions[0];
+  if (option && option.dataset.width) {
+    applyDimensionPreset(option);
+  } else {
+    scheduleGenerate();
+  }
+});
+
+colorPresetSelect?.addEventListener("change", () => {
+  const option = colorPresetSelect.selectedOptions[0];
+  if (option && option.dataset.color) {
+    applyColorPreset(option);
+  } else {
+    scheduleGenerate();
   }
 });
 
