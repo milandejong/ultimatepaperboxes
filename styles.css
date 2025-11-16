@@ -1,265 +1,64 @@
 body {
-  font-family: "Inter", sans-serif;
-  background-color: #f9fafb;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.workspace-layout {
-  display: flex;
-  gap: 2rem;
-  width: min(1400px, 100%);
-  align-items: flex-start;
-}
-.controls-container {
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  width: 100%;
-  max-width: 380px;
-  flex: 0 0 360px;
-}
-.preview-section {
-  flex: 1;
-  width: 100%;
-}
-.preview-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-}
-.control-group-card + .control-group-card {
-  margin-top: 1.25rem;
-}
-.group-header {
-  font-size: 1.05rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #6b7280;
-  margin-bottom: 0.75rem;
-}
-.control-group {
-  margin-bottom: 1rem;
-}
-.control-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.35rem;
-  font-size: 0.95rem;
-  color: #374151;
-}
-.control-group input,
-.color-select,
-.color-text-input,
-.color-input,
-.mini-control input {
-  width: 100%;
-  padding: 0.45rem 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 0.95rem;
-  background-color: #fff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.control-group input:focus,
-.mini-control input:focus,
-.color-select:focus,
-.color-text-input:focus,
-.color-input:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
-}
-.color-input {
-  height: 2.5rem;
-  cursor: text;
-}
-.color-input.native-color-picker {
-  cursor: pointer;
-  padding: 0.2rem;
-}
-.color-select:disabled,
-.color-text-input:disabled,
-.color-input:disabled {
-  background-color: #f3f4f6;
-  cursor: not-allowed;
-}
-.control-row {
-  display: grid;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-.control-row.row-3 {
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-}
-.control-row.row-2 {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-}
-.control-row.row-1 {
-  grid-template-columns: 1fr;
-}
-.color-row .color-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.color-row .color-stack .mini-control {
-  height: 100%;
-}
-.input-with-unit {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-.input-with-unit input {
-  flex: 1;
-  padding-right: 2.5rem;
-}
-.input-with-unit .unit {
-  position: absolute;
-  right: 0.75rem;
-  font-size: 0.85rem;
-  color: #6b7280;
-}
-.mini-control {
-  display: flex;
-  flex-direction: column;
-}
-.mini-control label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 0.2rem;
-  color: #4b5563;
-}
-.mini-control input {
-  font-size: 0.9rem;
-}
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  background-color: #f9fafb;
-  width: 100%;
-}
-.checkbox-group.ink-save {
-  align-self: flex-start;
-  margin-top: auto;
-}
-.generate-btn {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #6366f1;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1rem;
-}
-.generate-btn:hover {
-  background-color: #4f46e5;
-}
-.download-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 0.75rem;
-  background-color: #10b981;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 0.75rem;
-}
-.download-btn:hover {
-  background-color: #059669;
-}
-.preview-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  width: 100%;
-}
-.svg-preview-container {
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  background-color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  font-family: system-ui, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
   padding: 1rem;
-  flex: 1;
-  height: 45vh;
-}
-.svg-preview-container > div {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.svg-preview-container svg {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-}
-.preview-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #374151;
-  text-align: center;
-}
-h1 {
-  font-size: 1.875rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  color: #111827;
-}
-.dimension-pair {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  align-items: end;
-}
-.dimension-link {
-  align-self: center;
-  justify-self: center;
-  font-size: 1.25rem;
-  color: #6b7280;
-  background: #f3f4f6;
-  border: 1px dashed #cbd5f5;
-  border-radius: 999px;
-  padding: 0.25rem 0.5rem;
 }
 
-@media (max-width: 1024px) {
-  .workspace-layout {
-    flex-direction: column;
-  }
-  .controls-container {
-    max-width: 100%;
-    flex: initial;
-  }
-  .preview-wrapper {
-    grid-template-columns: 1fr;
-  }
+h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+section {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.inputs label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+.inputs input,
+.inputs select {
+  margin-top: 0.25rem;
+  padding: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.inputs .checkbox-option {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inputs .checkbox-option input {
+  margin-top: 0;
+  width: auto;
+}
+
+.previews {
+  display: grid;
+  gap: 1rem;
+}
+
+.preview-area {
+  border: 1px dashed #bbb;
+  min-height: 200px;
+  padding: 0.5rem;
 }

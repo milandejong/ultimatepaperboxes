@@ -1,4 +1,6 @@
 const MM_TO_PX = 3;
+const DECIMAL_PRECISION = 1;
+const DECIMAL_FACTOR = 10 ** DECIMAL_PRECISION;
 
 const LAYOUT_CONSTANTS = {
   margin: 20,
@@ -896,48 +898,12 @@ const lidHeightInput = document.getElementById("lidHeight");
 const allowanceInput = document.getElementById("allowance");
 const boxColorPicker = document.getElementById("boxColorPicker");
 const boxColorText = document.getElementById("boxColorText");
-const colorPresetSelect = document.getElementById("colorPreset");
+const useColorCheckbox = document.getElementById("useColor");
 const showLabelsInput = document.getElementById("showLabels");
 const inkSaveInput = document.getElementById("inkSave");
 const svgContainerBox = document.getElementById("svg-container-box");
 const svgContainerLid = document.getElementById("svg-container-lid");
 const MAX_PREVIEW_MM = 100;
-
-function setupInteractiveColorPicker() {
-  if (!boxColorPicker) {
-    return;
-  }
-
-  if (typeof Coloris === "undefined") {
-    boxColorPicker.type = "color";
-    boxColorPicker.removeAttribute("data-coloris");
-    boxColorPicker.classList.add("native-color-picker");
-    return;
-  }
-
-  boxColorPicker.type = "text";
-  boxColorPicker.setAttribute("data-coloris", "");
-  boxColorPicker.classList.remove("native-color-picker");
-
-  Coloris({
-    el: "#boxColorPicker",
-    themeMode: "auto",
-    formatToggle: true,
-    format: "hex",
-    swatches: [
-      "#f97316",
-      "#facc15",
-      "#10b981",
-      "#3b82f6",
-      "#6366f1",
-      "#a855f7",
-      "#ec4899",
-      "#ef4444",
-      "#111827",
-      "#ffffff",
-    ],
-  });
-}
 
 const debugLabelsEnabled = (() => {
   if (typeof window === "undefined" || typeof window.location === "undefined") {
@@ -984,9 +950,9 @@ function setNumericInputValue(input, value, fallback = 0) {
   }
   const resolved = Number.isFinite(value) ? value : fallback;
   const clamped = clampToInputMin(resolved, input);
-  const rounded = Math.round(clamped * 1000) / 1000;
+  const rounded = Math.round(clamped * DECIMAL_FACTOR) / DECIMAL_FACTOR;
   if (document.activeElement !== input) {
-    input.value = `${rounded}`;
+    input.value = rounded.toFixed(DECIMAL_PRECISION);
   }
   return rounded;
 }
@@ -1005,7 +971,7 @@ function updateInkSaveAvailability() {
   if (!inkSaveInput) {
     return;
   }
-  const disableInkSave = colorPresetSelect?.value === "transparent";
+  const disableInkSave = useColorCheckbox ? !useColorCheckbox.checked : false;
   inkSaveInput.disabled = disableInkSave;
   if (disableInkSave) {
     inkSaveInput.checked = false;
@@ -1013,8 +979,7 @@ function updateInkSaveAvailability() {
 }
 
 function resolveSelectedColor() {
-  const preset = colorPresetSelect?.value || "custom";
-  if (preset === "transparent") {
+  if (!useColorCheckbox?.checked) {
     return null;
   }
   const manualValue = normalizeColorValue(boxColorText?.value);
@@ -1028,16 +993,9 @@ function resolveSelectedColor() {
   return null;
 }
 
-function ensureCustomPreset() {
-  if (colorPresetSelect && colorPresetSelect.value === "transparent") {
-    colorPresetSelect.value = "custom";
-    setColorInputsEnabled(true);
-    updateInkSaveAvailability();
-  }
-}
-
 function syncLinkedDimensions() {
   const allowance = parseInputValue(allowanceInput, 3);
+  setNumericInputValue(allowanceInput, allowance, 3);
   const baseWidth = parseInputValue(widthInput, 61);
   setNumericInputValue(widthInput, baseWidth, 61);
 
@@ -1056,8 +1014,10 @@ function generateBox() {
   const allowance = parseInputValue(allowanceInput, 3);
   const W = parseInputValue(widthInput, 61);
   const H = parseInputValue(heightInput, 25);
+  setNumericInputValue(heightInput, H, 25);
   const D = parseInputValue(depthInput, 46);
   const lidHeight = parseInputValue(lidHeightInput, 20);
+  setNumericInputValue(lidHeightInput, lidHeight, 20);
   const showLabels = Boolean(showLabelsInput?.checked);
   const debugLabels = debugLabelsEnabled;
   const inkSave = Boolean(inkSaveInput?.checked);
@@ -1129,15 +1089,14 @@ numericInputs.forEach((input) => {
   input?.addEventListener("input", scheduleGenerate);
 });
 
-colorPresetSelect?.addEventListener("change", () => {
-  const enableCustom = colorPresetSelect.value !== "transparent";
+useColorCheckbox?.addEventListener("change", () => {
+  const enableCustom = Boolean(useColorCheckbox.checked);
   setColorInputsEnabled(enableCustom);
   updateInkSaveAvailability();
   scheduleGenerate();
 });
 
 boxColorPicker?.addEventListener("input", () => {
-  ensureCustomPreset();
   if (boxColorText) {
     boxColorText.value = boxColorPicker.value;
   }
@@ -1145,7 +1104,6 @@ boxColorPicker?.addEventListener("input", () => {
 });
 
 boxColorText?.addEventListener("input", () => {
-  ensureCustomPreset();
   const { hex } = normalizeToHex(boxColorText.value);
   if (hex && boxColorPicker) {
     boxColorPicker.value = hex;
@@ -1170,9 +1128,8 @@ showLabelsInput?.addEventListener("change", scheduleGenerate);
 inkSaveInput?.addEventListener("change", scheduleGenerate);
 
 window.addEventListener("load", () => {
-  setupInteractiveColorPicker();
   syncLinkedDimensions();
-  setColorInputsEnabled(colorPresetSelect?.value !== "transparent");
+  setColorInputsEnabled(Boolean(useColorCheckbox?.checked));
   updateInkSaveAvailability();
   if (boxColorPicker && boxColorText && !boxColorText.value) {
     boxColorText.value = boxColorPicker.value;
