@@ -25,10 +25,9 @@
   --radius-lg: 0.75rem;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow-md: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 2px 4px 0 rgb(0 0 0 / 0.06);
 
   /* Typography */
   --font-family: "Inter", system-ui, -apple-system, sans-serif;
@@ -127,12 +126,7 @@ section {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
-  box-shadow: var(--shadow-md);
-  transition: box-shadow var(--transition-base);
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .inputs {
@@ -210,8 +204,6 @@ section {
 .form-field select:focus {
   outline: none;
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px rgba(168, 162, 158, 0.1);
-  transform: translateY(-1px);
 }
 
 .form-field input:hover:not(:focus),
@@ -337,20 +329,11 @@ input[type="color"]::-moz-color-swatch {
   margin-top: 0;
   width: auto;
   cursor: pointer;
-  transition: transform var(--transition-fast);
-}
-
-.inputs .checkbox-option input:hover {
-  transform: scale(1.1);
 }
 
 .inputs .checkbox-option input:disabled {
   cursor: not-allowed;
   opacity: 0.6;
-}
-
-.inputs .checkbox-option input:disabled:hover {
-  transform: none;
 }
 
 .previews {
@@ -381,11 +364,6 @@ input[type="color"]::-moz-color-swatch {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-base);
-}
-
-.preview-area:hover {
-  border-color: var(--color-border-focus);
 }
 
 button {
@@ -403,13 +381,10 @@ button {
 
 button:hover {
   background-color: var(--color-accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
 }
 
 button:active {
-  transform: translateY(0);
-  box-shadow: none;
+  background-color: var(--color-accent-hover);
 }
 
 button:focus {
