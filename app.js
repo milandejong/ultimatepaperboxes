@@ -227,11 +227,13 @@ function createTextElement({ x, y, content, style, rotation }) {
   return `<text x="${x}" y="${y}" style="${style}"${rotationAttr}>${content}</text>`;
 }
 
-function computeLayout(W, H, D, allowance) {
+function computeLayout(W, H, D, allowance, insideClearance = 3) {
   const { margin, panelGHeight, sideFlapWidth } = LAYOUT_CONSTANTS;
 
   const y0 = margin;
-  const y1 = y0 + (D - (allowance - 1));
+  const adjustedInsideClearance = Math.max(0, insideClearance);
+  const topPanelDepth = Math.max(0, D - adjustedInsideClearance);
+  const y1 = y0 + topPanelDepth;
   const y2 = y1 + H;
   const y3 = y2 + H;
   const y4 = y3 + D;
@@ -802,6 +804,7 @@ function createBoxSVG({
   height,
   depth,
   allowance,
+  insideClearance = 3,
   bleed = COLOR_SETTINGS.bleed,
   isLid = false,
   showLabels = false,
@@ -811,7 +814,13 @@ function createBoxSVG({
   boxHeight = 0,
   lidHeight = 0,
 }) {
-  const layout = computeLayout(width, height, depth, allowance);
+  const layout = computeLayout(
+    width,
+    height,
+    depth,
+    allowance,
+    insideClearance
+  );
   const styles = getStyleConfig({ isLid, color });
   const foldLinesMarkup = buildFoldLines(layout, styles);
   const cutPathMarkup = buildCutPath(layout, styles);
@@ -901,6 +910,7 @@ const heightInput = document.getElementById("height");
 const lidHeightInput = document.getElementById("lidHeight");
 const allowanceInput = document.getElementById("allowance");
 const bleedInput = document.getElementById("bleed");
+const insideClearanceInput = document.getElementById("insideClearance");
 const boxColorPicker = document.getElementById("boxColorPicker");
 const boxColorText = document.getElementById("boxColorText");
 const showLabelsInput = document.getElementById("showLabels");
@@ -1257,6 +1267,8 @@ function generateBox() {
   const allowance = parseInputValue(allowanceInput, 1);
   const bleedValue = parseInputValue(bleedInput, COLOR_SETTINGS.bleed);
   setNumericInputValue(bleedInput, bleedValue, COLOR_SETTINGS.bleed);
+  const insideClearance = parseInputValue(insideClearanceInput, 3);
+  setNumericInputValue(insideClearanceInput, insideClearance, 3);
   const W = parseInputValue(widthInput, 61);
   const H = parseInputValue(heightInput, 25);
   setNumericInputValue(heightInput, H, 25);
@@ -1273,6 +1285,7 @@ function generateBox() {
     height: H,
     depth: D,
     allowance,
+    insideClearance,
     bleed: bleedValue,
     isLid: false,
     showLabels,
@@ -1299,6 +1312,7 @@ function generateBox() {
     height: lidHeight,
     depth: lidDepth,
     allowance,
+    insideClearance,
     bleed: bleedValue,
     isLid: true,
     showLabels,
@@ -1349,6 +1363,7 @@ const numericInputs = [
   lidHeightInput,
   allowanceInput,
   bleedInput,
+  insideClearanceInput,
 ];
 
 numericInputs.forEach((input) => {
