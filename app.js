@@ -903,7 +903,6 @@ const allowanceInput = document.getElementById("allowance");
 const bleedInput = document.getElementById("bleed");
 const boxColorPicker = document.getElementById("boxColorPicker");
 const boxColorText = document.getElementById("boxColorText");
-const useColorCheckbox = document.getElementById("useColor");
 const showLabelsInput = document.getElementById("showLabels");
 const inkSaveInput = document.getElementById("inkSave");
 const dimensionPresetSelect = document.getElementById("dimensionPreset");
@@ -1019,11 +1018,25 @@ function syncColorPresetSelection() {
   if (!colorPresetSelect) {
     return;
   }
-  const activeHex = getActiveColorHex();
-  if (!activeHex) {
-    colorPresetSelect.value = "";
+
+  if (colorPresetSelect.value === "transparent") {
+    if (window.syncPresetChipStates) {
+      window.syncPresetChipStates();
+    }
     return;
   }
+
+  const activeHex = getActiveColorHex();
+  if (!activeHex) {
+    if (colorPresetSelect.value !== "") {
+      colorPresetSelect.value = "";
+    }
+    if (window.syncPresetChipStates) {
+      window.syncPresetChipStates();
+    }
+    return;
+  }
+
   const match = Array.from(colorPresetSelect.options).find((option) => {
     const optionHex = getOptionHex(option);
     return optionHex ? optionHex === activeHex : false;
@@ -1037,13 +1050,14 @@ function syncColorPresetSelection() {
 function applyColorPreset(option) {
   const presetHex = getOptionHex(option);
   if (!presetHex) {
+    if (colorPresetSelect.value === "transparent") {
+      updateColorInputsState();
+      scheduleGenerate();
+    }
     return;
   }
-  if (useColorCheckbox) {
-    useColorCheckbox.checked = true;
-  }
-  setColorInputsEnabled(true);
-  updateInkSaveAvailability();
+
+  updateColorInputsState();
   if (boxColorPicker) {
     boxColorPicker.value = presetHex;
   }
@@ -1086,8 +1100,9 @@ function describeCustomDimensions() {
 }
 
 function describeCustomColor() {
-  if (!useColorCheckbox?.checked) {
-    return "No color fill";
+  const selectedOption = colorPresetSelect.selectedOptions[0];
+  if (selectedOption && selectedOption.value === "transparent") {
+    return "Transparent";
   }
   const hex = getActiveColorHex();
   return hex ? hex.toUpperCase() : "Custom color";
@@ -1174,32 +1189,42 @@ function setNumericInputValue(input, value, fallback = 0) {
   return rounded;
 }
 
-function setColorInputsEnabled(enabled) {
-  const shouldDisable = !enabled;
+function updateColorInputsState() {
+  const isTransparent =
+    colorPresetSelect && colorPresetSelect.value === "transparent";
+  const isCustom = colorPresetSelect && colorPresetSelect.value === "";
+  const shouldDisable = isTransparent;
+
   if (boxColorPicker) {
     boxColorPicker.disabled = shouldDisable;
   }
   if (boxColorText) {
     boxColorText.disabled = shouldDisable;
   }
-  if (colorPresetSelect) {
-    colorPresetSelect.disabled = shouldDisable;
+  if (inkSaveInput) {
+    inkSaveInput.disabled = shouldDisable;
   }
-}
 
-function updateInkSaveAvailability() {
-  if (!inkSaveInput) {
-    return;
+  if (isCustom) {
+    if (boxColorPicker) {
+      boxColorPicker.disabled = false;
+    }
+    if (boxColorText) {
+      boxColorText.disabled = false;
+    }
+    if (inkSaveInput) {
+      inkSaveInput.disabled = false;
+    }
   }
-  const disableInkSave = useColorCheckbox ? !useColorCheckbox.checked : false;
-  inkSaveInput.disabled = disableInkSave;
-  // Don't change the checked state - let user's selection persist
 }
 
 function resolveSelectedColor() {
-  if (!useColorCheckbox?.checked) {
+  const isTransparent =
+    colorPresetSelect && colorPresetSelect.value === "transparent";
+  if (isTransparent) {
     return null;
   }
+
   const manualValue = normalizeColorValue(boxColorText?.value);
   if (manualValue) {
     return manualValue;
@@ -1341,18 +1366,6 @@ numericInputs.forEach((input) => {
   });
 });
 
-useColorCheckbox?.addEventListener("change", () => {
-  const enableCustom = Boolean(useColorCheckbox.checked);
-  setColorInputsEnabled(enableCustom);
-  updateInkSaveAvailability();
-  if (!enableCustom && colorPresetSelect) {
-    colorPresetSelect.value = "";
-  } else {
-    syncColorPresetSelection();
-  }
-  scheduleGenerate();
-});
-
 boxColorPicker?.addEventListener("input", () => {
   if (boxColorText) {
     boxColorText.value = boxColorPicker.value;
@@ -1394,10 +1407,17 @@ dimensionPresetSelect?.addEventListener("change", () => {
 
 colorPresetSelect?.addEventListener("change", () => {
   const option = colorPresetSelect.selectedOptions[0];
-  if (option && option.dataset.color) {
-    applyColorPreset(option);
-  } else {
-    scheduleGenerate();
+  if (option) {
+    if (option.value === "transparent") {
+      updateColorInputsState();
+      scheduleGenerate();
+    } else if (option.dataset.color) {
+      applyColorPreset(option);
+    } else {
+      // Custom color
+      updateColorInputsState();
+      scheduleGenerate();
+    }
   }
 });
 
@@ -1496,7 +1516,8 @@ function populatePresetDropdowns() {
 
   // Populate color presets
   if (colorPresetSelect) {
-    colorPresetSelect.innerHTML = '<option value="">Custom color</option>';
+    colorPresetSelect.innerHTML =
+      '<option value="transparent">Transparent</option><option value="">Custom color</option>';
     COLOR_PRESETS.forEach((preset) => {
       const option = document.createElement("option");
       option.value = preset.id;
@@ -1510,9 +1531,13 @@ function populatePresetDropdowns() {
 window.addEventListener("load", () => {
   loadPresets();
   populatePresetDropdowns();
+
+  if (colorPresetSelect) {
+    colorPresetSelect.value = "transparent";
+  }
+
   syncLinkedDimensions();
-  setColorInputsEnabled(Boolean(useColorCheckbox?.checked));
-  updateInkSaveAvailability();
+  updateColorInputsState();
   if (boxColorPicker && boxColorText && !boxColorText.value) {
     boxColorText.value = boxColorPicker.value;
   }

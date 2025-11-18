@@ -11,13 +11,13 @@
   --color-accent-hover: #c2410c;
 
   /* Spacing */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 0.75rem;
-  --space-lg: 1rem;
-  --space-xl: 1.25rem;
-  --space-2xl: 1.5rem;
-  --space-3xl: 2rem;
+  --space-xs: 0.15rem;
+  --space-sm: 0.25rem;
+  --space-md: 0.4rem;
+  --space-lg: 0.6rem;
+  --space-xl: 0.8rem;
+  --space-2xl: 1rem;
+  --space-3xl: 1.2rem;
 
   /* Border radius */
   --radius-sm: 0.375rem;
@@ -125,14 +125,14 @@ section {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
+  padding: var(--space-md) var(--space-lg);
   box-shadow: var(--shadow-sm);
 }
 
 .inputs {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: var(--space-md);
 }
 
 .form-section {
