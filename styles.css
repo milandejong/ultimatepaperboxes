@@ -103,8 +103,8 @@ main.layout {
 }
 
 .inputs-panel {
-  flex: 0 0 420px;
-  max-width: 480px;
+  flex: 0 0 380px;
+  max-width: 420px;
   width: 100%;
 }
 
