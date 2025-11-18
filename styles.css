@@ -1,0 +1,408 @@
+:root {
+  /* Colors */
+  --color-bg: #fafaf9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f5f5f4;
+  --color-border: #e7e5e4;
+  --color-border-focus: #a8a29e;
+  --color-text: #1c1917;
+  --color-text-muted: #57534e;
+  --color-accent: #ea580c;
+  --color-accent-hover: #c2410c;
+
+  /* Spacing */
+  --space-xs: 0.15rem;
+  --space-sm: 0.25rem;
+  --space-md: 0.4rem;
+  --space-lg: 0.6rem;
+  --space-xl: 0.8rem;
+  --space-2xl: 1rem;
+  --space-3xl: 1.2rem;
+
+  /* Border radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow-md: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 2px 4px 0 rgb(0 0 0 / 0.06);
+
+  /* Typography */
+  --font-family: "Inter", system-ui, -apple-system, sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.preview-area svg {
+  transition: opacity var(--transition-base);
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+  line-height: 1.6;
+}
+
+h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-xl);
+  letter-spacing: -0.025em;
+}
+
+main.layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2xl);
+}
+
+.inputs-panel {
+  flex: 0 0 380px;
+  max-width: 420px;
+  width: 100%;
+}
+
+.preview-panel {
+  flex: 1 1 520px;
+  width: 100%;
+}
+
+section {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.form-section h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+  letter-spacing: -0.015em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.section-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.form-row {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.form-row.cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form-row.cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.form-row.cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.form-field label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.form-field input,
+.form-field select {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+}
+
+.form-field input:hover:not(:focus),
+.form-field select:hover:not(:focus) {
+  border-color: var(--color-border-focus);
+}
+
+.form-field input:disabled,
+.form-field select:disabled {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-field input:disabled:hover,
+.form-field select:disabled:hover {
+  border-color: var(--color-border);
+  transform: none;
+}
+
+input[type="color"] {
+  height: 38px;
+  padding: var(--space-xs);
+  cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: calc(var(--radius-sm) - 2px);
+}
+
+input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: calc(var(--radius-sm) - 2px);
+}
+
+/* Preset chips */
+.preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.preset-chip:hover {
+  border-color: var(--color-border-focus);
+  background-color: var(--color-surface);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.preset-chip.active {
+  color: var(--color-surface);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.preset-chip.active:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.color-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.preset-chip.active .color-swatch {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.inputs .checkbox-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.inputs .checkbox-option:hover {
+  color: var(--color-text);
+}
+
+.inputs .checkbox-option:has(input:disabled) {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.inputs .checkbox-option:has(input:disabled):hover {
+  color: var(--color-text-muted);
+}
+
+.inputs .checkbox-option input {
+  margin-top: 0;
+  width: auto;
+  cursor: pointer;
+}
+
+.inputs .checkbox-option input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.previews {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: var(--space-lg);
+}
+
+.previews > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.previews h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.preview-area {
+  background-color: var(--color-surface);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  min-height: 200px;
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-surface);
+  background-color: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+button:hover {
+  background-color: var(--color-accent-hover);
+}
+
+button:active {
+  background-color: var(--color-accent-hover);
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
+}
+
+@media (max-width: 900px) {
+  main.layout {
+    flex-direction: column;
+  }
+
+  .previews {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row.cols-3,
+  .form-row.cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
