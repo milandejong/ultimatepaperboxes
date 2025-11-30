@@ -138,6 +138,11 @@ const FOOTER_VECTOR_MARKUP = String.raw`
   </g>
 </g>`;
 
+const FOOTER_LOGO_PATH = "assets/footer-logo.svg";
+let footerLogoMarkup = FOOTER_VECTOR_MARKUP;
+let footerLogoWidth = FOOTER_VECTOR_WIDTH;
+let footerLogoHeight = FOOTER_VECTOR_HEIGHT;
+
 const COLOR_SETTINGS = {
   bleed: 4,
   panelOpacity: 1,
@@ -921,8 +926,10 @@ function buildFooterText(layout, isLid, physicalWidth) {
     ? Math.max(physicalWidth, 1)
     : Math.max(x.x4 - x.x3, 1);
   const targetWidth = panelWidth * FOOTER_TARGET_WIDTH_RATIO;
-  const scale = targetWidth / FOOTER_VECTOR_WIDTH;
-  const scaledHeight = FOOTER_VECTOR_HEIGHT * scale;
+  const referenceWidth = footerLogoWidth || FOOTER_VECTOR_WIDTH;
+  const referenceHeight = footerLogoHeight || FOOTER_VECTOR_HEIGHT;
+  const scale = targetWidth / referenceWidth;
+  const scaledHeight = referenceHeight * scale;
 
   const footerY = isLid ? y.y0 + padding : y.y4 - padding;
   const originX = footerX - targetWidth / 2;
@@ -930,7 +937,7 @@ function buildFooterText(layout, isLid, physicalWidth) {
 
   const baseGroup = `
     <g aria-label="${FOOTER_TEXT}" transform="translate(${originX} ${originY}) scale(${scale})" style="${FOOTER_GROUP_STYLE}">
-      ${FOOTER_VECTOR_MARKUP}
+      ${footerLogoMarkup || FOOTER_VECTOR_MARKUP}
     </g>
   `;
 
@@ -1064,7 +1071,7 @@ const dimensionPresetSelect = document.getElementById("dimensionPreset");
 const colorPresetSelect = document.getElementById("colorPreset");
 const svgContainerBox = document.getElementById("svg-container-box");
 const svgContainerLid = document.getElementById("svg-container-lid");
-const MAX_PREVIEW_MM = 100;
+const MAX_PREVIEW_MM = 200;
 
 function parsePresetNumber(option, key) {
   if (!option?.dataset?.[key]) {
@@ -1657,6 +1664,64 @@ async function loadPresets() {
   COLOR_PRESETS = data?.colors || [];
 }
 
+async function loadFooterLogo() {
+  if (typeof fetch !== "function") {
+    return;
+  }
+
+  try {
+    const response = await fetch(FOOTER_LOGO_PATH, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const svgText = await response.text();
+    const svgMatch = svgText.match(/<svg\b[^>]*>([\s\S]*?)<\/svg>/i);
+    if (!svgMatch) {
+      footerLogoMarkup = svgText.trim();
+      return;
+    }
+
+    footerLogoMarkup = svgMatch[1].trim() || FOOTER_VECTOR_MARKUP;
+
+    const svgTag = svgMatch[0];
+    const viewBoxMatch = svgTag.match(/viewBox=["']([^"']+)["']/i);
+    if (viewBoxMatch) {
+      const viewBoxParts = viewBoxMatch[1]
+        .trim()
+        .split(/[\s,]+/)
+        .map((value) => Number(value));
+      if (
+        viewBoxParts.length === 4 &&
+        Number.isFinite(viewBoxParts[2]) &&
+        Number.isFinite(viewBoxParts[3]) &&
+        viewBoxParts[2] > 0 &&
+        viewBoxParts[3] > 0
+      ) {
+        footerLogoWidth = viewBoxParts[2];
+        footerLogoHeight = viewBoxParts[3];
+        return;
+      }
+    }
+
+    const widthMatch = svgTag.match(/width=["']([\d.]+)["']/i);
+    const heightMatch = svgTag.match(/height=["']([\d.]+)["']/i);
+    const parsedWidth = widthMatch ? Number(widthMatch[1]) : null;
+    const parsedHeight = heightMatch ? Number(heightMatch[1]) : null;
+    if (
+      Number.isFinite(parsedWidth) &&
+      Number.isFinite(parsedHeight) &&
+      parsedWidth > 0 &&
+      parsedHeight > 0
+    ) {
+      footerLogoWidth = parsedWidth;
+      footerLogoHeight = parsedHeight;
+    }
+  } catch (error) {
+    console.error("Error loading footer logo:", error);
+  }
+}
+
 function populatePresetDropdowns() {
   // Populate dimension presets
   if (dimensionPresetSelect) {
@@ -1711,8 +1776,25 @@ function initAdvancedToggle() {
   setState(false);
 }
 
+function initDonateAvatarSwap() {
+  const donateButton = document.querySelector(".donate-button");
+  const donateAvatar = document.querySelector(".donate-avatar");
+
+  if (!donateButton || !donateAvatar) {
+    return;
+  }
+
+  const heartSrc = "me_hearts.png";
+
+  donateButton.addEventListener("click", () => {
+    if (donateAvatar.getAttribute("src") !== heartSrc) {
+      donateAvatar.setAttribute("src", heartSrc);
+    }
+  });
+}
+
 window.addEventListener("load", async () => {
-  await loadPresets();
+  await Promise.all([loadPresets(), loadFooterLogo()]);
   populatePresetDropdowns();
 
   if (colorPresetSelect) {
@@ -1726,5 +1808,6 @@ window.addEventListener("load", async () => {
   }
   initPresetChips();
   initAdvancedToggle();
+  initDonateAvatarSwap();
   generateBox();
 });
