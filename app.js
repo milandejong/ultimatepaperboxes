@@ -1071,7 +1071,7 @@ const dimensionPresetSelect = document.getElementById("dimensionPreset");
 const colorPresetSelect = document.getElementById("colorPreset");
 const svgContainerBox = document.getElementById("svg-container-box");
 const svgContainerLid = document.getElementById("svg-container-lid");
-const MAX_PREVIEW_MM = 100;
+const MAX_PREVIEW_MM = 200;
 
 function parsePresetNumber(option, key) {
   if (!option?.dataset?.[key]) {
@@ -1776,6 +1776,23 @@ function initAdvancedToggle() {
   setState(false);
 }
 
+function initDonateAvatarSwap() {
+  const donateButton = document.querySelector(".donate-button");
+  const donateAvatar = document.querySelector(".donate-avatar");
+
+  if (!donateButton || !donateAvatar) {
+    return;
+  }
+
+  const heartSrc = "me_hearts.png";
+
+  donateButton.addEventListener("click", () => {
+    if (donateAvatar.getAttribute("src") !== heartSrc) {
+      donateAvatar.setAttribute("src", heartSrc);
+    }
+  });
+}
+
 window.addEventListener("load", async () => {
   await Promise.all([loadPresets(), loadFooterLogo()]);
   populatePresetDropdowns();
@@ -1791,5 +1808,6 @@ window.addEventListener("load", async () => {
   }
   initPresetChips();
   initAdvancedToggle();
+  initDonateAvatarSwap();
   generateBox();
 });
