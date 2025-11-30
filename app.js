@@ -1688,6 +1688,29 @@ function populatePresetDropdowns() {
   }
 }
 
+function initAdvancedToggle() {
+  const advancedSection = document.querySelector(".advanced-section");
+  const toggleButton = document.querySelector(".advanced-toggle");
+  const advancedContent = document.getElementById("advancedFields");
+
+  if (!advancedSection || !toggleButton || !advancedContent) {
+    return;
+  }
+
+  const setState = (expanded) => {
+    toggleButton.setAttribute("aria-expanded", expanded ? "true" : "false");
+    advancedSection.classList.toggle("is-collapsed", !expanded);
+    toggleButton.textContent = expanded ? "Hide" : "Show";
+  };
+
+  toggleButton.addEventListener("click", () => {
+    const expanded = toggleButton.getAttribute("aria-expanded") === "true";
+    setState(!expanded);
+  });
+
+  setState(false);
+}
+
 window.addEventListener("load", async () => {
   await loadPresets();
   populatePresetDropdowns();
@@ -1702,5 +1725,6 @@ window.addEventListener("load", async () => {
     boxColorText.value = boxColorPicker.value;
   }
   initPresetChips();
+  initAdvancedToggle();
   generateBox();
 });

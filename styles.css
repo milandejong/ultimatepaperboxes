@@ -30,7 +30,7 @@
   --shadow-lg: 0 2px 4px 0 rgb(0 0 0 / 0.06);
 
   /* Typography */
-  --font-family: "Inter", system-ui, -apple-system, sans-serif;
+  --font-family: "DM Sans", system-ui, -apple-system, sans-serif;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.125rem;
@@ -81,36 +81,65 @@ body {
   font-size: var(--font-size-base);
   color: var(--color-text);
   background-color: var(--color-bg);
-  max-width: 1200px;
+  max-width: 80vw;
   margin: 0 auto;
-  padding: var(--space-lg);
+  width: 80vw;
+  padding: var(--space-lg) var(--space-lg) var(--space-lg) var(--space-lg);
   line-height: 1.6;
 }
 
 h1 {
-  font-size: var(--font-size-2xl);
+  display: none;
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text);
   margin-bottom: var(--space-xl);
   letter-spacing: -0.025em;
 }
 
+.inputs-panel > h1 {
+  display: block;
+}
+
 main.layout {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: stretch;
   gap: var(--space-2xl);
 }
 
 .inputs-panel {
+  display: flex;
+  flex-direction: column;
   flex: 0 0 380px;
   max-width: 420px;
   width: 100%;
 }
 
 .preview-panel {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 520px;
   width: 100%;
+}
+
+.inputs-panel > h1 {
+  margin-bottom: var(--space-lg);
+}
+
+.inputs-panel > .inputs {
+  flex: 1;
+}
+
+.preview-panel {
+  padding-bottom: calc(var(--space-xl) + var(--space-lg));
+}
+
+.preview-panel > .previews {
+  flex: 1;
+  min-height: 100%;
+  padding-bottom: var(--space-lg);
+  margin-bottom: calc(-1 * var(--space-lg));
 }
 
 section {
@@ -129,6 +158,12 @@ section {
   box-shadow: var(--shadow-sm);
 }
 
+.donate-card {
+  background-color: var(--color-accent);
+  color: var(--color-surface);
+  padding: var(--space-sm) var(--space-md);
+}
+
 .inputs {
   display: flex;
   flex-direction: column;
@@ -142,8 +177,8 @@ section {
 }
 
 .form-section h3 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text);
   margin-bottom: var(--space-xs);
   letter-spacing: -0.015em;
@@ -186,6 +221,45 @@ section {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
+}
+
+.advanced-section {
+  gap: var(--space-sm);
+}
+
+.advanced-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.advanced-toggle {
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.advanced-toggle:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-border-focus);
+}
+
+.advanced-section.is-collapsed .advanced-content {
+  display: none;
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin: 0;
 }
 
 .form-field input,
@@ -340,12 +414,20 @@ input[type="color"]::-moz-color-swatch {
   display: grid;
   grid-template-columns: repeat(2, minmax(220px, 1fr));
   gap: var(--space-lg);
+  height: 100%;
+  align-content: stretch;
+  grid-auto-rows: 1fr;
 }
 
 .previews > div {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  height: 100%;
+}
+
+.preview-area {
+  flex: 1;
 }
 
 .previews h3 {
@@ -396,27 +478,27 @@ button:focus {
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-sm);
 }
 
 .donate-media {
   display: flex;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   align-items: center;
 }
 
 .donate-avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
   object-fit: cover;
-  border: 2px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
 }
 
 .donate-section p {
-  color: var(--color-text-muted);
+  color: var(--color-surface);
   margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
 }
 
 .donate-button {
@@ -434,7 +516,7 @@ button:focus {
 }
 
 .donate-section .donate-button {
-  align-self: center;
+  align-self: stretch;
 }
 
 .donate-button:hover,
