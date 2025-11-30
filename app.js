@@ -1627,18 +1627,34 @@ function initPresetChips() {
   syncChipStates();
 }
 
-function loadPresets() {
-  try {
-    const presetScript = document.getElementById("presets-data");
-    if (presetScript) {
-      const data = JSON.parse(presetScript.textContent);
-      DIMENSION_PRESETS = data.dimensions || [];
-      COLOR_PRESETS = data.colors || [];
+async function loadPresets() {
+  let data = null;
+
+  if (typeof fetch === "function") {
+    try {
+      const response = await fetch("presets.json", { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      data = await response.json();
+    } catch (error) {
+      console.error("Error fetching presets.json:", error);
     }
-  } catch (error) {
-    console.error("Error loading presets:", error);
-    // Keep empty arrays as fallback
   }
+
+  if (!data) {
+    try {
+      const presetScript = document.getElementById("presets-data");
+      if (presetScript?.textContent) {
+        data = JSON.parse(presetScript.textContent);
+      }
+    } catch (error) {
+      console.error("Error parsing inline presets:", error);
+    }
+  }
+
+  DIMENSION_PRESETS = data?.dimensions || [];
+  COLOR_PRESETS = data?.colors || [];
 }
 
 function populatePresetDropdowns() {
@@ -1672,8 +1688,31 @@ function populatePresetDropdowns() {
   }
 }
 
-window.addEventListener("load", () => {
-  loadPresets();
+function initAdvancedToggle() {
+  const advancedSection = document.querySelector(".advanced-section");
+  const toggleButton = document.querySelector(".advanced-toggle");
+  const advancedContent = document.getElementById("advancedFields");
+
+  if (!advancedSection || !toggleButton || !advancedContent) {
+    return;
+  }
+
+  const setState = (expanded) => {
+    toggleButton.setAttribute("aria-expanded", expanded ? "true" : "false");
+    advancedSection.classList.toggle("is-collapsed", !expanded);
+    toggleButton.textContent = expanded ? "Hide" : "Show";
+  };
+
+  toggleButton.addEventListener("click", () => {
+    const expanded = toggleButton.getAttribute("aria-expanded") === "true";
+    setState(!expanded);
+  });
+
+  setState(false);
+}
+
+window.addEventListener("load", async () => {
+  await loadPresets();
   populatePresetDropdowns();
 
   if (colorPresetSelect) {
@@ -1686,5 +1725,6 @@ window.addEventListener("load", () => {
     boxColorText.value = boxColorPicker.value;
   }
   initPresetChips();
+  initAdvancedToggle();
   generateBox();
 });

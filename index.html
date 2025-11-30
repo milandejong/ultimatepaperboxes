@@ -7,233 +7,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
-    <script id="presets-data" type="application/json">
-      {
-        "dimensions": [
-          {
-            "id": "carc-40-tiles",
-            "name": "Carcassonne 40 tile box",
-            "width": 89.6,
-            "depth": 46,
-            "height": 46,
-            "lidHeight": 23
-          },
-          {
-            "id": "carc-meeple",
-            "name": "Carcassonne meeple box",
-            "width": 59.5,
-            "depth": 46,
-            "height": 46,
-            "lidHeight": 23
-          },
-          {
-            "id": "agri-player-cards",
-            "name": "Agricola player/cards/tiles",
-            "width": 91,
-            "depth": 61,
-            "height": 21,
-            "lidHeight": 13
-          },
-          {
-            "id": "agri-resources",
-            "name": "Agricola resources",
-            "width": 42,
-            "depth": 61,
-            "height": 21,
-            "lidHeight": 13
-          },
-          {
-            "id": "quacks-tokens",
-            "name": "Quacks of Quedlinburg tokens",
-            "width": 83.5,
-            "depth": 42.5,
-            "height": 25,
-            "lidHeight": 13
-          },
-          {
-            "id": "quacks-cards",
-            "name": "Quacks of Quedlinburg cards",
-            "width": 90,
-            "depth": 58,
-            "height": 24,
-            "lidHeight": 13
-          }
-        ],
-        "colors": [
-          {
-            "id": "carc-black",
-            "name": "Carcassonne black meeple",
-            "color": "#424042"
-          },
-          {
-            "id": "carc-red",
-            "name": "Carcassonne red meeple",
-            "color": "#de2735"
-          },
-          {
-            "id": "carc-green",
-            "name": "Carcassonne green meeple",
-            "color": "#38803d"
-          },
-          {
-            "id": "carc-pink",
-            "name": "Carcassonne pink meeple",
-            "color": "#de89b9"
-          },
-          {
-            "id": "carc-blue",
-            "name": "Carcassonne blue meeple",
-            "color": "#245aa5"
-          },
-          {
-            "id": "carc-yellow",
-            "name": "Carcassonne yellow meeple",
-            "color": "#fde306"
-          },
-          {
-            "id": "agri-major",
-            "name": "Agricola major improvements",
-            "color": "#97162c"
-          },
-          {
-            "id": "agri-minor",
-            "name": "Agricola minor improvements",
-            "color": "#c59b20"
-          },
-          {
-            "id": "agri-occupations",
-            "name": "Agricola occupations",
-            "color": "#cac50d"
-          },
-          {
-            "id": "agri-vegetable",
-            "name": "Agricola vegetable",
-            "color": "#fab131"
-          },
-          { "id": "agri-clay", "name": "Agricola clay", "color": "#b6754d" },
-          { "id": "agri-reed", "name": "Agricola reed", "color": "#cfd0cf" },
-          { "id": "agri-wool", "name": "Agricola wool", "color": "#d7d1b0" },
-          { "id": "agri-wood", "name": "Agricola wood", "color": "#946a5b" },
-          { "id": "agri-stone", "name": "Agricola stone", "color": "#52514f" },
-          {
-            "id": "agri-wild-boar",
-            "name": "Agricola wild boar",
-            "color": "#0e100d"
-          },
-          { "id": "agri-grain", "name": "Agricola grain", "color": "#f5df3e" },
-          {
-            "id": "agri-cattle",
-            "name": "Agricola cattle",
-            "color": "#8b6e5f"
-          },
-          {
-            "id": "agri-fields",
-            "name": "Agricola fields",
-            "color": "#c9c04a"
-          },
-          {
-            "id": "agri-stone-tiles",
-            "name": "Agricola stone tiles",
-            "color": "#e0b843"
-          },
-          {
-            "id": "agri-extras",
-            "name": "Agricola extras",
-            "color": "#addb6f"
-          },
-          {
-            "id": "quacks-red",
-            "name": "Quacks Red player",
-            "color": "#E02327"
-          },
-          {
-            "id": "quacks-blue",
-            "name": "Quacks Blue player",
-            "color": "#2462AE"
-          },
-          {
-            "id": "quacks-green",
-            "name": "Quacks Green player",
-            "color": "#51B852"
-          },
-          {
-            "id": "quacks-yellow",
-            "name": "Quacks Yellow player",
-            "color": "#D3B22C"
-          },
-          {
-            "id": "quacks-black",
-            "name": "Quacks Black player",
-            "color": "#464B57"
-          },
-          { "id": "quacks-gems", "name": "Quacks Gems", "color": "#E42168" },
-          {
-            "id": "quacks-pumpkins",
-            "name": "Quacks Pumpkins",
-            "color": "#FAA532"
-          },
-          {
-            "id": "quacks-toadstool",
-            "name": "Quacks Toadstool",
-            "color": "#EE352E"
-          },
-          {
-            "id": "quacks-garden-spider",
-            "name": "Quacks Garden Spider",
-            "color": "#56BA57"
-          },
-          {
-            "id": "quacks-crow-skull",
-            "name": "Quacks Crow Skull",
-            "color": "#2C8CAF"
-          },
-          {
-            "id": "quacks-mandrake",
-            "name": "Quacks Mandrake",
-            "color": "#F7ED46"
-          },
-          {
-            "id": "quacks-hawkmoth",
-            "name": "Quacks Hawkmoth",
-            "color": "#3C455E"
-          },
-          {
-            "id": "quacks-ghost-breath",
-            "name": "Quacks Ghost' Breath",
-            "color": "#A553A0"
-          },
-          {
-            "id": "quacks-locoweed",
-            "name": "Quacks Locoweed",
-            "color": "#90C996"
-          },
-          {
-            "id": "quacks-cherry-bombs",
-            "name": "Quacks Cherry Bombs",
-            "color": "#DBF0F3"
-          },
-          {
-            "id": "quacks-fortune-teller",
-            "name": "Quacks Fortune Teller Cards",
-            "color": "#6E3577"
-          },
-          {
-            "id": "quacks-patients",
-            "name": "Quacks Patients",
-            "color": "#8FC3DB"
-          }
-        ]
-      }
-    </script>
+    <link rel="icon" type="image/png" href="me.png" />
   </head>
   <body>
-    <h1>Ultimate Paper Box Generator</h1>
     <main class="layout">
       <section class="inputs-panel">
+        <h1>Ultimate Paper Box Generator</h1>
         <div class="inputs">
           <div class="card">
             <div class="form-section">
@@ -248,12 +31,12 @@
               <div class="form-row cols-4">
                 <div class="form-field">
                   <label for="width">Width</label>
-                  <input type="number" id="width" value="61" step="0.1" />
+                  <input type="number" id="width" value="50" step="0.1" />
                 </div>
 
                 <div class="form-field">
                   <label for="depth">Depth</label>
-                  <input type="number" id="depth" value="46" step="0.1" />
+                  <input type="number" id="depth" value="40" step="0.1" />
                 </div>
 
                 <div class="form-field">
@@ -262,7 +45,7 @@
                 </div>
                 <div class="form-field">
                   <label for="lidHeight">Lid Height</label>
-                  <input type="number" id="lidHeight" value="20" step="0.1" />
+                  <input type="number" id="lidHeight" value="15" step="0.1" />
                 </div>
               </div>
             </div>
@@ -305,48 +88,104 @@
 
           <div class="card">
             <div class="form-section">
-              <h3>Advanced</h3>
-              <div class="form-row cols-3">
-                <div class="form-field">
-                  <label for="allowance">Fold Clearance</label>
-                  <input
-                    type="number"
-                    id="allowance"
-                    value="1"
-                    min="0"
-                    max="10"
-                    step="0.1"
-                  />
-                </div>
-                <div class="form-field">
-                  <label for="bleed">Bleed</label>
-                  <input
-                    type="number"
-                    id="bleed"
-                    value="4"
-                    min="0"
-                    max="20"
-                    step="0.1"
-                  />
-                </div>
-                <div class="form-field">
-                  <label for="insideClearance">Inside Clearance</label>
-                  <input
-                    type="number"
-                    id="insideClearance"
-                    value="3"
-                    min="0"
-                    max="20"
-                    step="0.1"
-                  />
+              <h3>Labels</h3>
+              <label class="checkbox-option" for="showLabels">
+                <input type="checkbox" id="showLabels" />
+                Show Panel Labels
+              </label>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="form-section advanced-section is-collapsed">
+              <div class="advanced-header">
+                <h3>Advanced</h3>
+                <button
+                  class="advanced-toggle"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="advancedFields"
+                >
+                  Show
+                </button>
+              </div>
+              <div class="advanced-content" id="advancedFields">
+                <div class="form-row cols-3">
+                  <div class="form-field">
+                    <label for="allowance">Fold Clearance</label>
+                    <input
+                      type="number"
+                      id="allowance"
+                      value="1"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                    />
+                    <p class="field-hint">
+                      How much the flaps are shortened in height so they fit.
+                    </p>
+                  </div>
+                  <div class="form-field">
+                    <label for="bleed">Bleed</label>
+                    <input
+                      type="number"
+                      id="bleed"
+                      value="4"
+                      min="0"
+                      max="20"
+                      step="0.1"
+                    />
+                    <p class="field-hint">
+                      In ink save mode, extends color slightly past the cut line
+                      for clean edges.
+                    </p>
+                  </div>
+                  <div class="form-field">
+                    <label for="insideClearance">Inside Clearance</label>
+                    <input
+                      type="number"
+                      id="insideClearance"
+                      value="3"
+                      min="0"
+                      max="20"
+                      step="0.1"
+                    />
+                    <p class="field-hint">
+                      Controls how much the inner flap is shortened.
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div class="form-row">
-                <label class="checkbox-option" for="showLabels">
-                  <input type="checkbox" id="showLabels" />
-                  Show Panel Labels
-                </label>
+            </div>
+          </div>
+
+          <div
+            class="card donate-card"
+            aria-label="Support Ultimate Paper Box Generator"
+          >
+            <div class="donate-section">
+              <div class="donate-media">
+                <img
+                  class="donate-avatar"
+                  src="me.png"
+                  alt="Creator portrait"
+                  loading="lazy"
+                />
+                <div>
+                  <p>
+                    Enjoying the tool? Help cover hosting and development costs
+                    so this generator stays free for everyone.
+                  </p>
+                </div>
               </div>
+              <a
+                class="donate-button"
+                href="https://www.paypal.com/donate/?hosted_button_id=KSCVU5GBD8HLN"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Donate via PayPal
+              </a>
             </div>
           </div>
         </div>
