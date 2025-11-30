@@ -392,6 +392,56 @@ button:focus {
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
 }
 
+.donate-section {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.donate-media {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.donate-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.donate-section p {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.donate-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-sm);
+  background-color: #0070ba;
+  color: var(--color-surface);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: background-color var(--transition-fast);
+}
+
+.donate-section .donate-button {
+  align-self: center;
+}
+
+.donate-button:hover,
+.donate-section .donate-button:hover {
+  background-color: #005b95;
+}
+
 @media (max-width: 900px) {
   main.layout {
     flex-direction: column;
