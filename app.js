@@ -804,7 +804,7 @@ function buildLabels(layout, isLid, styles = STYLES, options = {}) {
     y: mid(y.y0, y.y1),
     content: "inside",
     style: staticPrimary,
-    rotation: isLid ? 0 : 180,
+    rotation: 0,
   });
 
   labels.push({
@@ -820,7 +820,7 @@ function buildLabels(layout, isLid, styles = STYLES, options = {}) {
     y: mid(y.y3, y.y4),
     content: isLid ? "top" : "bottom",
     style: isLid ? accentPrimary : staticPrimary,
-    rotation: isLid ? 0 : 180,
+    rotation: 0,
   });
 
   labels.push({
@@ -941,8 +941,8 @@ function buildFooterText(layout, isLid, physicalWidth) {
     rotation = 0;
     rotateCenterY = originY + scaledHeight / 2;
   } else {
-    originY = y.y3 + padding;
-    rotation = 180;
+    originY = y.y4 - padding - scaledHeight;
+    rotation = 0;
     rotateCenterY = originY + scaledHeight / 2;
   }
 
@@ -1418,8 +1418,8 @@ function resolveSelectedColor() {
 function syncLinkedDimensions() {
   const allowance = parseInputValue(allowanceInput, 1);
   setNumericInputValue(allowanceInput, allowance, 1);
-  const baseWidth = parseInputValue(widthInput, 61);
-  setNumericInputValue(widthInput, baseWidth, 61);
+  const baseWidth = parseInputValue(widthInput, 60);
+  setNumericInputValue(widthInput, baseWidth, 60);
 
   const baseDepth = parseInputValue(depthInput, 46);
   setNumericInputValue(depthInput, baseDepth, 46);
@@ -1438,7 +1438,7 @@ function generateBox() {
   setNumericInputValue(bleedInput, bleedValue, COLOR_SETTINGS.bleed);
   const insideClearance = parseInputValue(insideClearanceInput, 3);
   setNumericInputValue(insideClearanceInput, insideClearance, 3);
-  const W = parseInputValue(widthInput, 61);
+  const W = parseInputValue(widthInput, 60);
   const H = parseInputValue(heightInput, 25);
   setNumericInputValue(heightInput, H, 25);
   const D = parseInputValue(depthInput, 46);
