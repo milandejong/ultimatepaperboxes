@@ -30,7 +30,7 @@ const STYLES = {
 
 const FOOTER_TEXT = "webmachines.nl/ultimatepaperboxes";
 const FOOTER_TARGET_WIDTH_RATIO = 0.5;
-const FOOTER_GROUP_STYLE = "fill:#d1d5db; opacity:0.65;";
+const FOOTER_GROUP_STYLE = "fill:#ea580c; opacity:0.65;";
 const FOOTER_VECTOR_WIDTH = 2108;
 const FOOTER_VECTOR_HEIGHT = 114;
 const FOOTER_VECTOR_MARKUP = String.raw`
@@ -804,7 +804,7 @@ function buildLabels(layout, isLid, styles = STYLES, options = {}) {
     y: mid(y.y0, y.y1),
     content: "inside",
     style: staticPrimary,
-    rotation: 180,
+    rotation: isLid ? 0 : 180,
   });
 
   labels.push({
@@ -820,6 +820,7 @@ function buildLabels(layout, isLid, styles = STYLES, options = {}) {
     y: mid(y.y3, y.y4),
     content: isLid ? "top" : "bottom",
     style: isLid ? accentPrimary : staticPrimary,
+    rotation: isLid ? 0 : 180,
   });
 
   labels.push({
@@ -931,9 +932,21 @@ function buildFooterText(layout, isLid, physicalWidth) {
   const scale = targetWidth / referenceWidth;
   const scaledHeight = referenceHeight * scale;
 
-  const footerY = isLid ? y.y0 + padding : y.y4 - padding;
+  let originY;
+  let rotation = 0;
+  let rotateCenterY;
+
+  if (isLid) {
+    originY = y.y1 - padding - scaledHeight;
+    rotation = 0;
+    rotateCenterY = originY + scaledHeight / 2;
+  } else {
+    originY = y.y3 + padding;
+    rotation = 180;
+    rotateCenterY = originY + scaledHeight / 2;
+  }
+
   const originX = footerX - targetWidth / 2;
-  const originY = footerY - scaledHeight;
 
   const baseGroup = `
     <g aria-label="${FOOTER_TEXT}" transform="translate(${originX} ${originY}) scale(${scale})" style="${FOOTER_GROUP_STYLE}">
@@ -941,8 +954,8 @@ function buildFooterText(layout, isLid, physicalWidth) {
     </g>
   `;
 
-  if (isLid) {
-    return `<g transform="rotate(180 ${footerX} ${footerY})">${baseGroup}</g>`;
+  if (rotation !== 0) {
+    return `<g transform="rotate(${rotation} ${footerX} ${rotateCenterY})">${baseGroup}</g>`;
   }
   return baseGroup;
 }
@@ -1256,9 +1269,9 @@ function describeCustomDimensions() {
     (Math.round(value * DECIMAL_FACTOR) / DECIMAL_FACTOR)
       .toFixed(DECIMAL_PRECISION)
       .replace(/\.0$/, "");
-  return `${format(width)} x ${format(depth)} x ${format(height)} (lid ${format(
+  return `${format(width)}x${format(depth)}x${format(height)}x${format(
     lidHeight
-  )})`;
+  )}`;
 }
 
 function describeCustomColor() {
@@ -1287,15 +1300,19 @@ function buildDownloadFilename(type = "box") {
   const colorLabel = colorPresetSelect?.value
     ? getSelectedOptionLabel(colorPresetSelect, describeCustomColor())
     : describeCustomColor();
-  const segments = [dimensionLabel, colorLabel];
-  if (type === "lid") {
-    segments.push("Lid layout");
-  }
+
+  const typeLabel = type === "lid" ? "Lid" : "Box";
+  const segments = [
+    "UltimatePaperBoxes",
+    dimensionLabel,
+    colorLabel,
+    typeLabel,
+  ];
+
   const cleaned = segments
     .map(sanitizeFilenameSegment)
     .filter((segment) => segment.length > 0);
-  const fallback = type === "lid" ? "lid-layout" : "box-layout";
-  const base = cleaned.length > 0 ? cleaned.join(" - ") : fallback;
+  const base = cleaned.join(" - ");
   return `${base}.svg`;
 }
 
