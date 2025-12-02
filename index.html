@@ -14,210 +14,268 @@
     <link rel="icon" type="image/png" href="me.png" />
   </head>
   <body>
-    <main class="layout">
-      <section class="inputs-panel">
-        <h1>Ultimate Paper Box Generator</h1>
-        <div class="inputs">
-          <div class="card">
-            <div class="form-section">
-              <h3>Dimensions (mm)</h3>
-              <div class="form-row">
-                <div class="form-field">
-                  <select id="dimensionPreset">
-                    <!-- Options populated dynamically by JavaScript -->
-                  </select>
-                </div>
+    <div id="app-view">
+      <main class="layout">
+        <section class="inputs-panel">
+          <h1>Ultimate Paper Box Generator</h1>
+          <a onclick="toggleInstructions()" class="instructions-banner">
+            <div class="banner-icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+              </svg>
+            </div>
+            <div class="banner-content">
+              <div class="banner-title">Folding Instructions</div>
+              <div class="banner-subtitle">
+                Step-by-step guide to assemble your boxes
               </div>
-              <div class="form-row cols-4">
-                <div class="form-field">
-                  <label for="width">Width</label>
-                  <input type="number" id="width" value="60" step="0.1" />
+            </div>
+            <div class="banner-arrow">→</div>
+          </a>
+          <div class="inputs">
+            <div class="card">
+              <div class="form-section">
+                <h3>Dimensions (mm)</h3>
+                <div class="form-row">
+                  <div class="form-field">
+                    <select id="dimensionPreset">
+                      <!-- Options populated dynamically by JavaScript -->
+                    </select>
+                  </div>
                 </div>
+                <div class="form-row cols-4">
+                  <div class="form-field">
+                    <label for="width">Width</label>
+                    <input type="number" id="width" value="60" step="0.1" />
+                  </div>
 
-                <div class="form-field">
-                  <label for="depth">Depth</label>
-                  <input type="number" id="depth" value="40" step="0.1" />
-                </div>
+                  <div class="form-field">
+                    <label for="depth">Depth</label>
+                    <input type="number" id="depth" value="40" step="0.1" />
+                  </div>
 
-                <div class="form-field">
-                  <label for="height">Height</label>
-                  <input type="number" id="height" value="25" step="0.1" />
-                </div>
-                <div class="form-field">
-                  <label for="lidHeight">Lid Height</label>
-                  <input type="number" id="lidHeight" value="15" step="0.1" />
+                  <div class="form-field">
+                    <label for="height">Height</label>
+                    <input type="number" id="height" value="25" step="0.1" />
+                  </div>
+                  <div class="form-field">
+                    <label for="lidHeight">Lid Height</label>
+                    <input type="number" id="lidHeight" value="15" step="0.1" />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="card">
-            <div class="form-section">
-              <h3>Color</h3>
-              <div class="form-row">
-                <div class="form-field">
-                  <select id="colorPreset">
-                    <!-- Options populated dynamically by JavaScript -->
-                  </select>
+            <div class="card">
+              <div class="form-section">
+                <h3>Color</h3>
+                <div class="form-row">
+                  <div class="form-field">
+                    <select id="colorPreset">
+                      <!-- Options populated dynamically by JavaScript -->
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row cols-2">
+                  <div class="form-field">
+                    <label for="boxColorPicker">Color Picker</label>
+                    <input type="color" id="boxColorPicker" value="#f97316" />
+                  </div>
+
+                  <div class="form-field">
+                    <label for="boxColorText">HTML code</label>
+                    <input
+                      type="text"
+                      id="boxColorText"
+                      value="#f97316"
+                      placeholder="#f97316 or 'orange'"
+                    />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <label class="checkbox-option" for="inkSave">
+                    <input type="checkbox" id="inkSave" checked />
+                    Ink Save Mode
+                  </label>
                 </div>
               </div>
-              <div class="form-row cols-2">
-                <div class="form-field">
-                  <label for="boxColorPicker">Color Picker</label>
-                  <input type="color" id="boxColorPicker" value="#f97316" />
-                </div>
+            </div>
 
-                <div class="form-field">
-                  <label for="boxColorText">HTML code</label>
-                  <input
-                    type="text"
-                    id="boxColorText"
-                    value="#f97316"
-                    placeholder="#f97316 or 'orange'"
-                  />
-                </div>
-              </div>
-              <div class="form-row">
-                <label class="checkbox-option" for="inkSave">
-                  <input type="checkbox" id="inkSave" checked />
-                  Ink Save Mode
+            <div class="card">
+              <div class="form-section">
+                <h3>Labels</h3>
+                <label class="checkbox-option" for="showLabels">
+                  <input type="checkbox" id="showLabels" />
+                  Show Panel Labels
                 </label>
               </div>
             </div>
-          </div>
 
-          <div class="card">
-            <div class="form-section">
-              <h3>Labels</h3>
-              <label class="checkbox-option" for="showLabels">
-                <input type="checkbox" id="showLabels" />
-                Show Panel Labels
-              </label>
+            <div class="card">
+              <div class="form-section advanced-section is-collapsed">
+                <div class="advanced-header">
+                  <h3>Advanced</h3>
+                  <button
+                    class="advanced-toggle"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="advancedFields"
+                  >
+                    Show
+                  </button>
+                </div>
+                <div class="advanced-content" id="advancedFields">
+                  <div class="form-row cols-3">
+                    <div class="form-field">
+                      <label for="allowance">Fold Clearance</label>
+                      <input
+                        type="number"
+                        id="allowance"
+                        value="1"
+                        min="0"
+                        max="10"
+                        step="0.1"
+                      />
+                      <p class="field-hint">
+                        How much the flaps are shortened in height so they fit.
+                      </p>
+                    </div>
+                    <div class="form-field">
+                      <label for="bleed">Bleed</label>
+                      <input
+                        type="number"
+                        id="bleed"
+                        value="4"
+                        min="0"
+                        max="20"
+                        step="0.1"
+                      />
+                      <p class="field-hint">
+                        In ink save mode, extends color slightly past the cut
+                        line for clean edges.
+                      </p>
+                    </div>
+                    <div class="form-field">
+                      <label for="insideClearance">Inside Clearance</label>
+                      <input
+                        type="number"
+                        id="insideClearance"
+                        value="3"
+                        min="0"
+                        max="20"
+                        step="0.1"
+                      />
+                      <p class="field-hint">
+                        Controls how much the inner flap is shortened.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div class="card">
-            <div class="form-section advanced-section is-collapsed">
-              <div class="advanced-header">
-                <h3>Advanced</h3>
-                <button
-                  class="advanced-toggle"
-                  type="button"
-                  aria-expanded="false"
-                  aria-controls="advancedFields"
+            <div
+              class="card donate-card"
+              aria-label="Support Ultimate Paper Box Generator"
+            >
+              <div class="donate-section">
+                <div class="donate-media">
+                  <img
+                    class="donate-avatar"
+                    src="me.png"
+                    alt="Creator portrait"
+                    loading="lazy"
+                  />
+                  <div>
+                    <p>
+                      Enjoying the tool? Help cover hosting and development
+                      costs so this generator stays free for everyone.
+                    </p>
+                  </div>
+                </div>
+                <a
+                  class="donate-button"
+                  href="https://www.paypal.com/donate/?hosted_button_id=KSCVU5GBD8HLN"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  Show
-                </button>
-              </div>
-              <div class="advanced-content" id="advancedFields">
-                <div class="form-row cols-3">
-                  <div class="form-field">
-                    <label for="allowance">Fold Clearance</label>
-                    <input
-                      type="number"
-                      id="allowance"
-                      value="1"
-                      min="0"
-                      max="10"
-                      step="0.1"
-                    />
-                    <p class="field-hint">
-                      How much the flaps are shortened in height so they fit.
-                    </p>
-                  </div>
-                  <div class="form-field">
-                    <label for="bleed">Bleed</label>
-                    <input
-                      type="number"
-                      id="bleed"
-                      value="4"
-                      min="0"
-                      max="20"
-                      step="0.1"
-                    />
-                    <p class="field-hint">
-                      In ink save mode, extends color slightly past the cut line
-                      for clean edges.
-                    </p>
-                  </div>
-                  <div class="form-field">
-                    <label for="insideClearance">Inside Clearance</label>
-                    <input
-                      type="number"
-                      id="insideClearance"
-                      value="3"
-                      min="0"
-                      max="20"
-                      step="0.1"
-                    />
-                    <p class="field-hint">
-                      Controls how much the inner flap is shortened.
-                    </p>
-                  </div>
-                </div>
+                  Donate via PayPal
+                </a>
               </div>
             </div>
           </div>
+        </section>
 
-          <div
-            class="card donate-card"
-            aria-label="Support Ultimate Paper Box Generator"
-          >
-            <div class="donate-section">
-              <div class="donate-media">
-                <img
-                  class="donate-avatar"
-                  src="me.png"
-                  alt="Creator portrait"
-                  loading="lazy"
-                />
-                <div>
-                  <p>
-                    Enjoying the tool? Help cover hosting and development costs
-                    so this generator stays free for everyone.
-                  </p>
-                </div>
+        <section class="preview-panel">
+          <div class="previews">
+            <div class="card">
+              <h3>Box Layout</h3>
+              <div class="preview-area">
+                <div id="svg-container-box"></div>
               </div>
-              <a
-                class="donate-button"
-                href="https://www.paypal.com/donate/?hosted_button_id=KSCVU5GBD8HLN"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onclick="downloadSVG('svg-container-box', buildDownloadFilename('box'))"
               >
-                Donate via PayPal
-              </a>
+                Download Box SVG
+              </button>
+            </div>
+            <div class="card">
+              <h3>Lid Layout</h3>
+              <div class="preview-area">
+                <div id="svg-container-lid"></div>
+              </div>
+              <button
+                onclick="downloadSVG('svg-container-lid', buildDownloadFilename('lid'))"
+              >
+                Download Lid SVG
+              </button>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
+    </div>
 
-      <section class="preview-panel">
-        <div class="previews">
-          <div class="card">
-            <h3>Box Layout</h3>
-            <div class="preview-area">
-              <div id="svg-container-box"></div>
-            </div>
-            <button
-              onclick="downloadSVG('svg-container-box', buildDownloadFilename('box'))"
-            >
-              Download Box SVG
-            </button>
-          </div>
-          <div class="card">
-            <h3>Lid Layout</h3>
-            <div class="preview-area">
-              <div id="svg-container-lid"></div>
-            </div>
-            <button
-              onclick="downloadSVG('svg-container-lid', buildDownloadFilename('lid'))"
-            >
-              Download Lid SVG
-            </button>
+    <div id="instructions-view" class="instructions-layout">
+      <a onclick="toggleInstructions()" class="back-link"
+        >← Back to Generator</a
+      >
+
+      <div class="instructions-header">
+        <h1>Folding Instructions</h1>
+        <p>Follow these steps to assemble your box and lid perfectly.</p>
+      </div>
+
+      <div class="tools-section">
+        <h2>Tools Needed</h2>
+        <div class="tools-container">
+          <ul class="tools-list">
+            <li>Printer & Paper (Cardstock recommended)</li>
+            <li>Scissors or Craft Knife</li>
+            <li>Ruler</li>
+            <li>Scoring Tool (or dull knife/empty pen)</li>
+            <li>Cutting Mat (optional)</li>
+          </ul>
+          <div class="tools-image">
+            <img src="assets/step_01.jpg" alt="Tools needed" />
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+
+      <div class="steps-grid" id="stepsGrid">
+        <!-- Steps will be populated here -->
+      </div>
+    </div>
 
     <script src="app.js" defer></script>
   </body>
