@@ -804,7 +804,7 @@ function buildLabels(layout, isLid, styles = STYLES, options = {}) {
     y: mid(y.y0, y.y1),
     content: "inside",
     style: staticPrimary,
-    rotation: 0,
+    rotation: isLid ? 0 : 180,
   });
 
   labels.push({
@@ -820,7 +820,7 @@ function buildLabels(layout, isLid, styles = STYLES, options = {}) {
     y: mid(y.y3, y.y4),
     content: isLid ? "top" : "bottom",
     style: isLid ? accentPrimary : staticPrimary,
-    rotation: 0,
+    rotation: isLid ? 0 : 180,
   });
 
   labels.push({
@@ -941,8 +941,8 @@ function buildFooterText(layout, isLid, physicalWidth) {
     rotation = 0;
     rotateCenterY = originY + scaledHeight / 2;
   } else {
-    originY = y.y4 - padding - scaledHeight;
-    rotation = 0;
+    originY = y.y3 + padding;
+    rotation = 180;
     rotateCenterY = originY + scaledHeight / 2;
   }
 
