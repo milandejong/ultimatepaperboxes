@@ -1828,3 +1828,125 @@ window.addEventListener("load", async () => {
   initDonateAvatarSwap();
   generateBox();
 });
+
+// Instructions Logic
+function toggleInstructions() {
+  const appView = document.getElementById("app-view");
+  const instructionsView = document.getElementById("instructions-view");
+
+  if (instructionsView.classList.contains("active")) {
+    // Switch to App
+    instructionsView.classList.remove("active");
+    setTimeout(() => {
+      instructionsView.style.display = "none";
+      appView.classList.remove("hidden");
+      window.scrollTo(0, 0);
+    }, 150);
+  } else {
+    // Switch to Instructions
+    appView.classList.add("hidden");
+    instructionsView.style.display = "block";
+    // Force reflow
+    void instructionsView.offsetWidth;
+    instructionsView.classList.add("active");
+    window.scrollTo(0, 0);
+
+    // Initialize if empty
+    const stepsContainer = document.getElementById("stepsGrid");
+    if (stepsContainer && stepsContainer.children.length === 0) {
+      initInstructions();
+    }
+  }
+}
+
+function initInstructions() {
+  const stepsContainer = document.getElementById("stepsGrid");
+  if (!stepsContainer) return;
+
+  const totalImages = 23;
+  const instructionSteps = totalImages - 1;
+
+  const sections = [
+    { startStep: 1, title: "Cutting" },
+    { startStep: 3, title: "Scoring" },
+    { startStep: 7, title: "Folding the box" },
+    { startStep: 12, title: "Folding the lid" },
+    { startStep: 16, title: "Assembling" },
+  ];
+
+  const stepDescriptions = {
+    1: "Print your designs on cardstock paper.",
+    2: "Cut along the solid black outer lines.",
+    3: "Align the dashed fold lines with your scoring tool.",
+    4: "Score all dashed lines to ensure clean, sharp folds.",
+    5: "Verify that every line has been scored.",
+    6: "Double-check all scores before proceeding.",
+    7: "Pre-fold along all scored lines to establish the shape.",
+    8: "Fold up the left side and tuck in the corner flaps.",
+    9: "Fold up the right side, ensuring all flaps are tucked inside the walls.",
+    10: "Fold the short back flap over and lock it into place.",
+    11: "Fold the long front flap over to cover the interior bottom.",
+    12: "Repeat for the lid: Fold up the left side and tuck in flaps.",
+    13: "Fold up the right side and tuck flaps inside the lid walls.",
+    14: "Fold the short back flap over and lock it.",
+    15: "Fold the long front flap over to finish the lid interior.",
+    16: "Your box and lid are now fully assembled.",
+    17: "Slide the lid onto the box to complete the package.",
+  };
+
+  // Render Steps 1 to 17
+  for (let i = 1; i <= 17; i++) {
+    // Check if we need to insert a section header
+    const section = sections.find((s) => s.startStep === i);
+    if (section) {
+      const header = document.createElement("div");
+      header.className = "section-header";
+      header.innerHTML = `<h2>${section.title}</h2>`;
+      stepsContainer.appendChild(header);
+    }
+
+    // Image index is step number + 1 (since step 1 is tools)
+    const imageIndex = i + 1;
+    const paddedIndex = String(imageIndex).padStart(2, "0");
+    const imagePath = `assets/step_${paddedIndex}.jpg`;
+
+    let defaultDesc = `Description for step ${i}. This explains what to do in this part of the assembly process.`;
+    if (i >= 16) defaultDesc = "Assemble the box and lid together.";
+
+    const description = stepDescriptions[i] || defaultDesc;
+
+    const stepCard = document.createElement("div");
+    stepCard.className = "step-card";
+    stepCard.innerHTML = `
+      <div class="step-image-container">
+        <img src="${imagePath}" alt="Step ${i}" loading="lazy" />
+      </div>
+      <div class="step-content">
+        <div class="step-number">${i}</div>
+        <p class="step-description">${description}</p>
+      </div>
+    `;
+    stepsContainer.appendChild(stepCard);
+  }
+
+  // Render Gallery Section (Steps 18 to 22)
+  const galleryHeader = document.createElement("div");
+  galleryHeader.className = "section-header";
+  galleryHeader.innerHTML = `<h2>Gallery</h2>`;
+  stepsContainer.appendChild(galleryHeader);
+
+  for (let i = 18; i <= instructionSteps; i++) {
+    const imageIndex = i + 1;
+    const paddedIndex = String(imageIndex).padStart(2, "0");
+    const imagePath = `assets/step_${paddedIndex}.jpg`;
+
+    const galleryCard = document.createElement("div");
+    galleryCard.className = "step-card";
+    galleryCard.innerHTML = `
+      <div class="step-image-container">
+        <img src="${imagePath}" alt="Gallery Image" loading="lazy" />
+      </div>
+    `;
+    stepsContainer.appendChild(galleryCard);
+  }
+}
