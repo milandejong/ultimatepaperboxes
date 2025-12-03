@@ -1823,15 +1823,31 @@ function populatePresetDropdowns() {
   if (dimensionPresetSelect) {
     dimensionPresetSelect.innerHTML =
       '<option value="">Custom dimensions</option>';
-    DIMENSION_PRESETS.forEach((preset) => {
-      const option = document.createElement("option");
-      option.value = preset.id;
-      option.textContent = preset.name;
-      option.dataset.width = preset.width;
-      option.dataset.depth = preset.depth;
-      option.dataset.height = preset.height;
-      option.dataset.lidHeight = preset.lidHeight;
-      dimensionPresetSelect.appendChild(option);
+    DIMENSION_PRESETS.forEach((item) => {
+      if (item.presets && Array.isArray(item.presets)) {
+        const optgroup = document.createElement("optgroup");
+        optgroup.label = item.category || item.name || "Group";
+        item.presets.forEach((preset) => {
+          const option = document.createElement("option");
+          option.value = preset.id;
+          option.textContent = preset.name;
+          option.dataset.width = preset.width;
+          option.dataset.depth = preset.depth;
+          option.dataset.height = preset.height;
+          option.dataset.lidHeight = preset.lidHeight;
+          optgroup.appendChild(option);
+        });
+        dimensionPresetSelect.appendChild(optgroup);
+      } else {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = item.name;
+        option.dataset.width = item.width;
+        option.dataset.depth = item.depth;
+        option.dataset.height = item.height;
+        option.dataset.lidHeight = item.lidHeight;
+        dimensionPresetSelect.appendChild(option);
+      }
     });
   }
 
@@ -1839,12 +1855,25 @@ function populatePresetDropdowns() {
   if (colorPresetSelect) {
     colorPresetSelect.innerHTML =
       '<option value="transparent">Transparent</option><option value="">Custom color</option>';
-    COLOR_PRESETS.forEach((preset) => {
-      const option = document.createElement("option");
-      option.value = preset.id;
-      option.textContent = preset.name;
-      option.dataset.color = preset.color;
-      colorPresetSelect.appendChild(option);
+    COLOR_PRESETS.forEach((item) => {
+      if (item.presets && Array.isArray(item.presets)) {
+        const optgroup = document.createElement("optgroup");
+        optgroup.label = item.category || item.name || "Group";
+        item.presets.forEach((preset) => {
+          const option = document.createElement("option");
+          option.value = preset.id;
+          option.textContent = preset.name;
+          option.dataset.color = preset.color;
+          optgroup.appendChild(option);
+        });
+        colorPresetSelect.appendChild(optgroup);
+      } else {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = item.name;
+        option.dataset.color = item.color;
+        colorPresetSelect.appendChild(option);
+      }
     });
   }
 }
