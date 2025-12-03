@@ -77,53 +77,93 @@
       ]
     },
     {
-      "category": "Card Sleeves / Sizes",
+      "category": "Card Sizes",
       "presets": [
         {
-          "id": "standard-poker-cards",
-          "name": "Standard Card Game / Poker (Magic, Pokémon)",
-          "width": 91,
-          "depth": 66.5,
-          "height": 24,
-          "lidHeight": 13
-        },
-        {
-          "id": "standard-euro-cards",
-          "name": "Standard European / Euro (Agricola)",
-          "width": 95,
-          "depth": 62,
-          "height": 24,
-          "lidHeight": 13
-        },
-        {
-          "id": "standard-american-cards",
-          "name": "Standard American (Bridge, Talisman)",
-          "width": 92,
-          "depth": 60,
-          "height": 24,
-          "lidHeight": 13
-        },
-        {
-          "id": "mini-euro-cards",
-          "name": "Mini European (Catan, Ticket to Ride)",
-          "width": 71,
-          "depth": 47,
-          "height": 24,
-          "lidHeight": 13
-        },
-        {
-          "id": "mini-american-cards",
-          "name": "Mini American (Mansions of Madness)",
+          "id": "mini-american",
+          "name": "Mini American (41 x 63 mm)",
           "width": 66,
           "depth": 44,
           "height": 24,
           "lidHeight": 13
         },
         {
-          "id": "tarot-large-cards",
-          "name": "Tarot / Large (Dixit, Mysterium)",
+          "id": "mini-european",
+          "name": "Mini European (44 x 68 mm)",
+          "width": 71,
+          "depth": 47,
+          "height": 24,
+          "lidHeight": 13
+        },
+        {
+          "id": "american-special",
+          "name": "American Special (54 x 86 mm)",
+          "width": 89,
+          "depth": 57,
+          "height": 24,
+          "lidHeight": 13
+        },
+        {
+          "id": "standard-american",
+          "name": "Standard American (57 x 89 mm)",
+          "width": 92,
+          "depth": 60,
+          "height": 24,
+          "lidHeight": 13
+        },
+        {
+          "id": "standard-european",
+          "name": "Standard European (59 x 92 mm)",
+          "width": 95,
+          "depth": 62,
+          "height": 24,
+          "lidHeight": 13
+        },
+        {
+          "id": "standard-card-game",
+          "name": "Standard Card Game (63.5 x 88 mm)",
+          "width": 91,
+          "depth": 66.5,
+          "height": 24,
+          "lidHeight": 13
+        },
+        {
+          "id": "square-small",
+          "name": "Square Small (70 x 70 mm)",
+          "width": 73,
+          "depth": 73,
+          "height": 24,
+          "lidHeight": 13
+        },
+        {
+          "id": "square-medium",
+          "name": "Square Medium (80 x 80 mm)",
+          "width": 83,
+          "depth": 83,
+          "height": 24,
+          "lidHeight": 13
+        },
+        {
+          "id": "tarot",
+          "name": "Tarot (70 x 120 mm)",
           "width": 123,
           "depth": 73,
+          "height": 24,
+          "lidHeight": 13
+        },
+        {
+          "id": "big-large",
+          "name": "Big / Large (65 x 100 mm)",
+          "width": 103,
+          "depth": 68,
+          "height": 24,
+          "lidHeight": 13
+        },
+        {
+          "id": "magnum-dixit",
+          "name": "Magnum / Dixit (80 x 120 mm)",
+          "width": 123,
+          "depth": 83,
           "height": 24,
           "lidHeight": 13
         }
