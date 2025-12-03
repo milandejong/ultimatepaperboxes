@@ -1082,6 +1082,7 @@ const showLabelsInput = document.getElementById("showLabels");
 const inkSaveInput = document.getElementById("inkSave");
 const dimensionPresetSelect = document.getElementById("dimensionPreset");
 const colorPresetSelect = document.getElementById("colorPreset");
+const paperSizeSelect = document.getElementById("paperSize");
 const svgContainerBox = document.getElementById("svg-container-box");
 const svgContainerLid = document.getElementById("svg-container-lid");
 const MAX_PREVIEW_MM = 200;
@@ -1486,6 +1487,80 @@ function generateBox() {
   svgContainerLid.innerHTML = lidSvgContent;
   const lidSvg = svgContainerLid.querySelector("svg");
   sizeSvgPreview(lidSvg);
+
+  // Calculate dimensions (excluding margins)
+  const margin = LAYOUT_CONSTANTS.margin * 2;
+  const boxW =
+    parseFloat(boxSvg.getAttribute("data-physical-width-mm") || "0") - margin;
+  const boxH =
+    parseFloat(boxSvg.getAttribute("data-physical-height-mm") || "0") - margin;
+  const lidW =
+    parseFloat(lidSvg.getAttribute("data-physical-width-mm") || "0") - margin;
+  const lidH =
+    parseFloat(lidSvg.getAttribute("data-physical-height-mm") || "0") - margin;
+
+  // Paper Size Logic
+  const papers = {
+    Letter: { w: 215.9, h: 279.4 },
+    A4: { w: 210, h: 297 },
+  };
+  const selectedPaper = paperSizeSelect ? paperSizeSelect.value : "A4";
+
+  let boxFits = true;
+  let lidFits = true;
+
+  if (selectedPaper !== "None") {
+    const paperSize = papers[selectedPaper] || papers.A4;
+    const paperMin = Math.min(paperSize.w, paperSize.h);
+    const paperMax = Math.max(paperSize.w, paperSize.h);
+
+    const checkFit = (w, h) => {
+      const min = Math.min(w, h);
+      const max = Math.max(w, h);
+      return min <= paperMin && max <= paperMax;
+    };
+
+    boxFits = checkFit(boxW, boxH);
+    lidFits = checkFit(lidW, lidH);
+  }
+
+  // Update dimensions info
+  const boxDimensionsEl = document.getElementById("box-dimensions");
+  if (boxDimensionsEl) {
+    boxDimensionsEl.textContent = `Dimensions: ${boxW.toFixed(
+      1
+    )} x ${boxH.toFixed(1)} mm`;
+    if (!boxFits) {
+      boxDimensionsEl.classList.add("exceeds-paper");
+      boxDimensionsEl.textContent += ` (Exceeds ${selectedPaper})`;
+    } else {
+      boxDimensionsEl.classList.remove("exceeds-paper");
+    }
+  }
+
+  const lidDimensionsEl = document.getElementById("lid-dimensions");
+  if (lidDimensionsEl) {
+    lidDimensionsEl.textContent = `Dimensions: ${lidW.toFixed(
+      1
+    )} x ${lidH.toFixed(1)} mm`;
+    if (!lidFits) {
+      lidDimensionsEl.classList.add("exceeds-paper");
+      lidDimensionsEl.textContent += ` (Exceeds ${selectedPaper})`;
+    } else {
+      lidDimensionsEl.classList.remove("exceeds-paper");
+    }
+  }
+
+  // Warning Logic
+  const warningEl = document.getElementById("dimensions-warning");
+  if (warningEl) {
+    if (!boxFits || !lidFits) {
+      warningEl.style.display = "block";
+    } else {
+      warningEl.style.display = "none";
+    }
+  }
+
   syncDimensionPresetSelection();
   syncColorPresetSelection();
 }
@@ -1539,6 +1614,10 @@ boxColorPicker?.addEventListener("input", () => {
     boxColorText.value = boxColorPicker.value;
   }
   syncColorPresetSelection();
+  scheduleGenerate();
+});
+
+paperSizeSelect?.addEventListener("change", () => {
   scheduleGenerate();
 });
 
@@ -1830,7 +1909,7 @@ window.addEventListener("load", async () => {
 });
 
 // Instructions Logic
-function toggleInstructions() {
+function toggleInstructions(targetId) {
   const appView = document.getElementById("app-view");
   const instructionsView = document.getElementById("instructions-view");
 
@@ -1856,6 +1935,15 @@ function toggleInstructions() {
     if (stepsContainer && stepsContainer.children.length === 0) {
       initInstructions();
     }
+
+    if (targetId) {
+      setTimeout(() => {
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 200);
+    }
   }
 }
 
@@ -1872,6 +1960,7 @@ function initInstructions() {
     { startStep: 7, title: "Folding the box" },
     { startStep: 12, title: "Folding the lid" },
     { startStep: 16, title: "Assembling" },
+    { startStep: 18, title: "Layout too large" },
   ];
 
   const stepDescriptions = {
@@ -1892,10 +1981,15 @@ function initInstructions() {
     15: "Fold the long front flap over to finish the lid interior.",
     16: "Your box and lid are now fully assembled.",
     17: "Slide the lid onto the box to complete the package.",
+    18: "Notice that the layout edges are cropped when printing.",
+    19: "Extend any cut lines that were truncated by the printer.",
+    20: "Be aware that shortened flaps may not tuck securely.",
+    21: "Apply tape to secure any loose flaps or sides.",
+    22: "The larger box is now complete.",
   };
 
-  // Render Steps 1 to 17
-  for (let i = 1; i <= 17; i++) {
+  // Render Steps 1 to 22
+  for (let i = 1; i <= 22; i++) {
     // Check if we need to insert a section header
     const section = sections.find((s) => s.startStep === i);
     if (section) {
@@ -1906,38 +2000,48 @@ function initInstructions() {
     }
 
     // Image index is step number + 1 (since step 1 is tools)
-    const imageIndex = i + 1;
-    const paddedIndex = String(imageIndex).padStart(2, "0");
-    const imagePath = `assets/step_${paddedIndex}.jpg`;
+    let imagePath;
+    if (i >= 18 && i <= 22) {
+      const croppedIndex = String(i - 17).padStart(2, "0");
+      imagePath = `assets/cropped_${croppedIndex}.jpg`;
+    } else {
+      const imageIndex = i + 1;
+      const paddedIndex = String(imageIndex).padStart(2, "0");
+      imagePath = `assets/step_${paddedIndex}.jpg`;
+    }
 
     let defaultDesc = `Description for step ${i}. This explains what to do in this part of the assembly process.`;
-    if (i >= 16) defaultDesc = "Assemble the box and lid together.";
+    if (i >= 16 && i < 18) defaultDesc = "Assemble the box and lid together.";
 
     const description = stepDescriptions[i] || defaultDesc;
 
+    // For steps 18-22, restart numbering from 1
+    const displayNumber = i >= 18 && i <= 22 ? i - 17 : i;
+
     const stepCard = document.createElement("div");
     stepCard.className = "step-card";
+    stepCard.id = `step-${i}`;
     stepCard.innerHTML = `
       <div class="step-image-container">
         <img src="${imagePath}" alt="Step ${i}" loading="lazy" />
       </div>
       <div class="step-content">
-        <div class="step-number">${i}</div>
+        <div class="step-number">${displayNumber}</div>
         <p class="step-description">${description}</p>
       </div>
     `;
     stepsContainer.appendChild(stepCard);
   }
 
-  // Render Gallery Section (Steps 18 to 22)
+  // Render Gallery Section (Remaining step images)
   const galleryHeader = document.createElement("div");
   galleryHeader.className = "section-header";
   galleryHeader.innerHTML = `<h2>Gallery</h2>`;
   stepsContainer.appendChild(galleryHeader);
 
-  for (let i = 18; i <= instructionSteps; i++) {
-    const imageIndex = i + 1;
-    const paddedIndex = String(imageIndex).padStart(2, "0");
+  // Images step_19.jpg to step_23.jpg (totalImages)
+  for (let imgIdx = 19; imgIdx <= totalImages; imgIdx++) {
+    const paddedIndex = String(imgIdx).padStart(2, "0");
     const imagePath = `assets/step_${paddedIndex}.jpg`;
 
     const galleryCard = document.createElement("div");

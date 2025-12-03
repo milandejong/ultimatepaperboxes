@@ -74,6 +74,29 @@
                     <input type="number" id="lidHeight" value="15" step="0.1" />
                   </div>
                 </div>
+                <div class="form-row">
+                  <div class="form-field">
+                    <label for="paperSize">Paper Size Check</label>
+                    <select id="paperSize">
+                      <option value="A4">A4 (210 x 297 mm)</option>
+                      <option value="Letter">Letter (215.9 x 279.4 mm)</option>
+                      <option value="None">No check</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="dimensions-warning" class="warning-message">
+                  <p>
+                    Your layout is a bit too big to fit on standard paper. Don't
+                    worry you can still print it, but some flaps or sides may be
+                    a bit short.
+                  </p>
+                  <p style="margin-top: 0.5rem">
+                    <a onclick="toggleInstructions('step-18')"
+                      >See folding instructions</a
+                    >
+                    for an example of a larger box!
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -224,6 +247,7 @@
               <div class="preview-area">
                 <div id="svg-container-box"></div>
               </div>
+              <div id="box-dimensions" class="dimensions-info"></div>
               <button
                 onclick="downloadSVG('svg-container-box', buildDownloadFilename('box'))"
               >
@@ -235,6 +259,7 @@
               <div class="preview-area">
                 <div id="svg-container-lid"></div>
               </div>
+              <div id="lid-dimensions" class="dimensions-info"></div>
               <button
                 onclick="downloadSVG('svg-container-lid', buildDownloadFilename('lid'))"
               >
