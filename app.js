@@ -19,7 +19,7 @@ const STYLES = {
   fold: {
     mountain: "stroke:#d1d5db; stroke-width:0.25; fill:none;",
     valley:
-      "stroke:#d1d5db; stroke-width:0.25; stroke-dasharray: 1 4; fill:none;",
+      "stroke:#d1d5db; stroke-width:0.25; stroke-dasharray: 1 2; fill:none;",
   },
   text: {
     primary:
@@ -29,7 +29,7 @@ const STYLES = {
   },
 };
 
-const FOOTER_TEXT = "webmachines.nl/ultimatepaperboxes";
+const FOOTER_TEXT = "boxes.webmachines.nl";
 const FOOTER_TARGET_WIDTH_RATIO = 0.5;
 const FOOTER_GROUP_STYLE = "fill:#ea580c; opacity:0.65;";
 const FOOTER_LOGO_PATH = "assets/footer-logo.svg";
