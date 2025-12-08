@@ -1,4 +1,5 @@
 const MM_TO_PX = 3;
+const EXPORT_PX_PER_MM = 4;
 const DECIMAL_PRECISION = 1;
 const DECIMAL_FACTOR = 10 ** DECIMAL_PRECISION;
 const LID_FIT_EXTRA = 0.3;
@@ -1069,6 +1070,123 @@ function downloadSVG(containerId, filename) {
   URL.revokeObjectURL(url);
 }
 
+async function svgToPngDataUrl(svgEl) {
+  const widthMm = parseFloat(
+    svgEl.getAttribute("data-physical-width-mm") || "0"
+  );
+  const heightMm = parseFloat(
+    svgEl.getAttribute("data-physical-height-mm") || "0"
+  );
+  if (!widthMm || !heightMm) {
+    throw new Error("Missing SVG dimensions");
+  }
+
+  const serializer = new XMLSerializer();
+  const svgString = serializer.serializeToString(svgEl);
+  const blob = new Blob([svgString], {
+    type: "image/svg+xml;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("Canvas not supported");
+    }
+    const widthPx = Math.max(
+      1,
+      Math.round(widthMm * Math.max(EXPORT_PX_PER_MM, MM_TO_PX))
+    );
+    const heightPx = Math.max(
+      1,
+      Math.round(heightMm * Math.max(EXPORT_PX_PER_MM, MM_TO_PX))
+    );
+    canvas.width = widthPx;
+    canvas.height = heightPx;
+    ctx.drawImage(image, 0, 0, widthPx, heightPx);
+    return canvas.toDataURL("image/png");
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function downloadPDF(containerId, filename) {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    return;
+  }
+
+  const svg = container.querySelector("svg");
+  if (!svg) {
+    return;
+  }
+
+  const widthMm = parseFloat(
+    svg.getAttribute("data-physical-width-mm") || "0"
+  );
+  const heightMm = parseFloat(
+    svg.getAttribute("data-physical-height-mm") || "0"
+  );
+  if (!widthMm || !heightMm) {
+    return;
+  }
+
+  const jsPdfCtor = window.jspdf?.jsPDF;
+  if (!jsPdfCtor) {
+    console.error("jsPDF not loaded");
+    return;
+  }
+
+  const papers = {
+    A4: [210, 297],
+    Letter: [215.9, 279.4],
+  };
+  const selectedPaper = paperSizeSelect ? paperSizeSelect.value : "A4";
+  const pageSize =
+    selectedPaper === "A4" || selectedPaper === "Letter"
+      ? papers[selectedPaper]
+      : [widthMm, heightMm];
+  const pdf = new jsPdfCtor({
+    unit: "mm",
+    format: pageSize,
+    orientation: pageSize[0] >= pageSize[1] ? "landscape" : "portrait",
+  });
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const x = (pageWidth - widthMm) / 2;
+  const y = (pageHeight - heightMm) / 2;
+
+  const svgClone = svg.cloneNode(true);
+  svgClone.removeAttribute("style");
+  const renderOptions = {
+    x,
+    y,
+    width: widthMm,
+    height: heightMm,
+    preserveAspectRatio: "xMidYMid meet",
+  };
+
+  if (window.svg2pdf && typeof window.svg2pdf === "function") {
+    await window.svg2pdf(svgClone, pdf, renderOptions);
+  } else if (pdf.svg && typeof pdf.svg === "function") {
+    await pdf.svg(svgClone, renderOptions);
+  } else {
+    console.error("svg2pdf plugin not loaded; cannot create vector PDF");
+    return;
+  }
+  const pdfName = (filename || buildPdfFilename()).replace(/\.svg$/i, ".pdf");
+  pdf.save(pdfName);
+}
+
 const widthInput = document.getElementById("width");
 const depthInput = document.getElementById("depth");
 const heightInput = document.getElementById("height");
@@ -1315,6 +1433,10 @@ function buildDownloadFilename(type = "box") {
     .filter((segment) => segment.length > 0);
   const base = cleaned.join(" - ");
   return `${base}.svg`;
+}
+
+function buildPdfFilename(type = "box") {
+  return buildDownloadFilename(type).replace(/\.svg$/i, ".pdf");
 }
 
 const debugLabelsEnabled = (() => {
