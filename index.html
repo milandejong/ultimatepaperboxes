@@ -136,16 +136,6 @@
             </div>
 
             <div class="card">
-              <div class="form-section">
-                <h3>Labels</h3>
-                <label class="checkbox-option" for="showLabels">
-                  <input type="checkbox" id="showLabels" />
-                  Show Panel Labels
-                </label>
-              </div>
-            </div>
-
-            <div class="card">
               <div class="form-section advanced-section is-collapsed">
                 <div class="advanced-header">
                   <h3>Advanced</h3>
@@ -204,15 +194,25 @@
                       </p>
                     </div>
                   </div>
-                  <div class="form-row cols-2">
+                  <div
+                    class="form-row cols-2"
+                    id="lineColorInputs"
+                    style="margin-top: 1.5rem"
+                  >
                     <div class="form-field">
                       <label for="cutLineColor">Outside Line Color</label>
                       <input type="color" id="cutLineColor" value="#000000" />
                     </div>
                     <div class="form-field">
                       <label for="foldLineColor">Fold Line Color</label>
-                      <input type="color" id="foldLineColor" value="#6b7280" />
+                      <input type="color" id="foldLineColor" value="#808080" />
                     </div>
+                  </div>
+                  <div class="form-row" style="margin-top: 1.5rem">
+                    <label class="checkbox-option" for="showLabels">
+                      <input type="checkbox" id="showLabels" />
+                      Show Panel Labels
+                    </label>
                   </div>
                 </div>
               </div>

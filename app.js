@@ -17,9 +17,9 @@ const LAYOUT_CONSTANTS = {
 const STYLES = {
   cut: "stroke:#000000; stroke-width:0.35; fill:none;",
   fold: {
-    mountain: "stroke:#6b7280; stroke-width:0.25; fill:none;",
+    mountain: "stroke:#808080; stroke-width:0.25; fill:none;",
     valley:
-      "stroke:#6b7280; stroke-width:0.25; stroke-dasharray: 1 2; fill:none;",
+      "stroke:#808080; stroke-width:0.25; stroke-dasharray: 1 2; fill:none;",
   },
   text: {
     primary:
@@ -1269,6 +1269,7 @@ function applyColorPreset(option) {
   const presetHex = getOptionHex(option);
   if (!presetHex) {
     if (colorPresetSelect.value === "transparent") {
+      if (foldLineColorInput) foldLineColorInput.value = "#808080";
       updateColorInputsState();
       scheduleGenerate();
     }
@@ -1282,6 +1283,7 @@ function applyColorPreset(option) {
   if (boxColorText) {
     boxColorText.value = presetHex;
   }
+  updateFoldLineColorInput(presetHex);
   syncColorPresetSelection();
   scheduleGenerate();
 }
@@ -1462,6 +1464,28 @@ function resolveSelectedColor() {
   return null;
 }
 
+function updateFoldLineColorInput(color) {
+  if (!foldLineColorInput || !color) {
+    return;
+  }
+  const { hex: normalizedHex } = normalizeToHex(color);
+  const workingColor = normalizedHex || color;
+  if (!workingColor) return;
+
+  const luminance = getPerceivedLuminance(workingColor);
+  const prefersLightText = luminance < 0.5;
+  const accentAdjustment = prefersLightText ? 0.2 : 0.25;
+  const accentColor = adjustHexBrightness(
+    workingColor,
+    prefersLightText,
+    accentAdjustment
+  );
+
+  if (accentColor) {
+    foldLineColorInput.value = accentColor;
+  }
+}
+
 function syncLinkedDimensions() {
   const allowance = parseInputValue(allowanceInput, 1);
   setNumericInputValue(allowanceInput, allowance, 1);
@@ -1496,7 +1520,7 @@ function generateBox() {
   const inkSave = Boolean(inkSaveInput?.checked);
   const appliedColor = resolveSelectedColor();
   const cutLineColor = cutLineColorInput?.value || "#000000";
-  const foldLineColor = foldLineColorInput?.value || "#6b7280";
+  const foldLineColor = foldLineColorInput?.value || "#808080";
 
   const boxSvgContent = createBoxSVG({
     width: W,
@@ -1668,6 +1692,7 @@ boxColorPicker?.addEventListener("input", () => {
   if (boxColorText) {
     boxColorText.value = boxColorPicker.value;
   }
+  updateFoldLineColorInput(boxColorPicker.value);
   syncColorPresetSelection();
   scheduleGenerate();
 });
@@ -1680,6 +1705,7 @@ boxColorText?.addEventListener("input", () => {
   const { hex } = normalizeToHex(boxColorText.value);
   if (hex && boxColorPicker) {
     boxColorPicker.value = hex;
+    updateFoldLineColorInput(hex);
   }
   syncColorPresetSelection();
   scheduleGenerate();
@@ -1711,6 +1737,7 @@ colorPresetSelect?.addEventListener("change", () => {
   const option = colorPresetSelect.selectedOptions[0];
   if (option) {
     if (option.value === "transparent") {
+      if (foldLineColorInput) foldLineColorInput.value = "#808080";
       updateColorInputsState();
       scheduleGenerate();
     } else if (option.dataset.color) {
@@ -1722,6 +1749,9 @@ colorPresetSelect?.addEventListener("change", () => {
     }
   }
 });
+
+cutLineColorInput?.addEventListener("input", scheduleGenerate);
+foldLineColorInput?.addEventListener("input", scheduleGenerate);
 
 showLabelsInput?.addEventListener("change", scheduleGenerate);
 
