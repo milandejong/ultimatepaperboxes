@@ -17,9 +17,9 @@ const LAYOUT_CONSTANTS = {
 const STYLES = {
   cut: "stroke:#000000; stroke-width:0.35; fill:none;",
   fold: {
-    mountain: "stroke:#d1d5db; stroke-width:0.25; fill:none;",
+    mountain: "stroke:#808080; stroke-width:0.25; fill:none;",
     valley:
-      "stroke:#d1d5db; stroke-width:0.25; stroke-dasharray: 1 2; fill:none;",
+      "stroke:#808080; stroke-width:0.25; stroke-dasharray: 1 2; fill:none;",
   },
   text: {
     primary:
@@ -182,12 +182,21 @@ function normalizeToHex(value) {
   };
 }
 
-function getStyleConfig({ color }) {
+function getStyleConfig({ color, cutLineColor, foldLineColor }) {
   const base = {
     cut: STYLES.cut,
     fold: { ...STYLES.fold },
     text: { ...STYLES.text },
   };
+
+  if (cutLineColor) {
+    base.cut = `stroke:${cutLineColor}; stroke-width:0.35; fill:none;`;
+  }
+
+  if (foldLineColor) {
+    base.fold.mountain = `stroke:${foldLineColor}; stroke-width:0.25; fill:none;`;
+    base.fold.valley = `stroke:${foldLineColor}; stroke-width:0.25; stroke-dasharray: 1 2; fill:none;`;
+  }
 
   if (!color) {
     return base;
@@ -211,7 +220,7 @@ function getStyleConfig({ color }) {
     muted: `fill:${mutedColor}; font-size: 4px; font-family: sans-serif; text-anchor: middle; alignment-baseline: middle;`,
   };
 
-  if (accentColor) {
+  if (accentColor && !foldLineColor) {
     base.fold = {
       ...base.fold,
       accent: `stroke:${accentColor}; stroke-width:0.25; fill:none;`,
@@ -236,7 +245,7 @@ function createTextElement({ x, y, content, style, rotation }) {
   return `<text x="${x}" y="${y}" style="${style}"${rotationAttr}>${content}</text>`;
 }
 
-function computeLayout(W, H, D, allowance, insideClearance = 3) {
+function computeLayout(W, H, D, allowance, insideClearance = 4) {
   const { margin, panelGHeight, sideFlapWidth } = LAYOUT_CONSTANTS;
 
   const y0 = margin;
@@ -415,13 +424,20 @@ function buildFoldLines(layout, styles = STYLES) {
     },
   ];
 
-  return lines
-    .map(({ x1, y1, x2, y2, style, accent }) => {
-      const appliedStyle =
-        accent && styles.fold?.accent ? styles.fold.accent : style;
-      return createLineElement(x1, y1, x2, y2, appliedStyle);
-    })
-    .join("\n");
+  const grouped = { valley: [], mountain: [] };
+
+  lines.forEach(({ x1, y1, x2, y2, style, accent }) => {
+    const appliedStyle =
+      accent && styles.fold?.accent ? styles.fold.accent : style;
+    const markup = createLineElement(x1, y1, x2, y2, appliedStyle);
+    const foldType = style === styles.fold.valley ? "valley" : "mountain";
+    grouped[foldType].push(markup);
+  });
+
+  return {
+    valley: grouped.valley.join("\n"),
+    mountain: grouped.mountain.join("\n"),
+  };
 }
 
 function buildCutPath(layout, styles = STYLES) {
@@ -859,7 +875,7 @@ function createBoxSVG({
   height,
   depth,
   allowance,
-  insideClearance = 3,
+  insideClearance = 4,
   bleed = COLOR_SETTINGS.bleed,
   isLid = false,
   showLabels = false,
@@ -868,6 +884,8 @@ function createBoxSVG({
   inkSave = false,
   boxHeight = 0,
   lidHeight = 0,
+  cutLineColor = null,
+  foldLineColor = null,
 }) {
   const layout = computeLayout(
     width,
@@ -876,10 +894,25 @@ function createBoxSVG({
     allowance,
     insideClearance
   );
-  const styles = getStyleConfig({ isLid, color });
+  const styles = getStyleConfig({ isLid, color, cutLineColor, foldLineColor });
   const foldLinesMarkup = buildFoldLines(layout, styles);
   const cutPathMarkup = buildCutPath(layout, styles);
-  const layoutPathsMarkup = [foldLinesMarkup, cutPathMarkup]
+
+  const valleyGroupMarkup = foldLinesMarkup?.valley
+    ? `<g id="valley-fold">${foldLinesMarkup.valley}</g>`
+    : "";
+  const mountainGroupMarkup = foldLinesMarkup?.mountain
+    ? `<g id="mountain-fold">${foldLinesMarkup.mountain}</g>`
+    : "";
+  const cutPathGroupMarkup = cutPathMarkup
+    ? `<g id="cut-path">${cutPathMarkup}</g>`
+    : "";
+
+  const layoutPathsMarkup = [
+    valleyGroupMarkup,
+    mountainGroupMarkup,
+    cutPathGroupMarkup,
+  ]
     .filter(Boolean)
     .join("\n");
   const labelMarkup = showLabels
@@ -919,13 +952,11 @@ function createBoxSVG({
                   Dotted light gray lines are for valley folds.
               </desc>
             ${colorPanels ? `<g id="color-panels">${colorPanels}</g>` : ""}
-              <g id="layout-paths">
-                  ${layoutPathsMarkup}
-              </g>
+              ${layoutPathsMarkup}
               <g id="labels">
                   ${labelMarkup}
               </g>
-                <g id="footer">
+                <g id="ultimate-paper-boxes-footer">
                   ${footerMarkup}
                 </g>
           </svg>
@@ -1085,6 +1116,8 @@ const lidHeightInput = document.getElementById("lidHeight");
 const allowanceInput = document.getElementById("allowance");
 const bleedInput = document.getElementById("bleed");
 const insideClearanceInput = document.getElementById("insideClearance");
+const cutLineColorInput = document.getElementById("cutLineColor");
+const foldLineColorInput = document.getElementById("foldLineColor");
 const boxColorPicker = document.getElementById("boxColorPicker");
 const boxColorText = document.getElementById("boxColorText");
 const showLabelsInput = document.getElementById("showLabels");
@@ -1236,6 +1269,7 @@ function applyColorPreset(option) {
   const presetHex = getOptionHex(option);
   if (!presetHex) {
     if (colorPresetSelect.value === "transparent") {
+      if (foldLineColorInput) foldLineColorInput.value = "#808080";
       updateColorInputsState();
       scheduleGenerate();
     }
@@ -1249,6 +1283,7 @@ function applyColorPreset(option) {
   if (boxColorText) {
     boxColorText.value = presetHex;
   }
+  updateFoldLineColorInput(presetHex);
   syncColorPresetSelection();
   scheduleGenerate();
 }
@@ -1429,6 +1464,28 @@ function resolveSelectedColor() {
   return null;
 }
 
+function updateFoldLineColorInput(color) {
+  if (!foldLineColorInput || !color) {
+    return;
+  }
+  const { hex: normalizedHex } = normalizeToHex(color);
+  const workingColor = normalizedHex || color;
+  if (!workingColor) return;
+
+  const luminance = getPerceivedLuminance(workingColor);
+  const prefersLightText = luminance < 0.5;
+  const accentAdjustment = prefersLightText ? 0.2 : 0.25;
+  const accentColor = adjustHexBrightness(
+    workingColor,
+    prefersLightText,
+    accentAdjustment
+  );
+
+  if (accentColor) {
+    foldLineColorInput.value = accentColor;
+  }
+}
+
 function syncLinkedDimensions() {
   const allowance = parseInputValue(allowanceInput, 1);
   setNumericInputValue(allowanceInput, allowance, 1);
@@ -1450,8 +1507,8 @@ function generateBox() {
   const allowance = parseInputValue(allowanceInput, 1);
   const bleedValue = parseInputValue(bleedInput, COLOR_SETTINGS.bleed);
   setNumericInputValue(bleedInput, bleedValue, COLOR_SETTINGS.bleed);
-  const insideClearance = parseInputValue(insideClearanceInput, 3);
-  setNumericInputValue(insideClearanceInput, insideClearance, 3);
+  const insideClearance = parseInputValue(insideClearanceInput, 4);
+  setNumericInputValue(insideClearanceInput, insideClearance, 4);
   const W = parseInputValue(widthInput, 60);
   const H = parseInputValue(heightInput, 25);
   setNumericInputValue(heightInput, H, 25);
@@ -1462,6 +1519,8 @@ function generateBox() {
   const debugLabels = debugLabelsEnabled;
   const inkSave = Boolean(inkSaveInput?.checked);
   const appliedColor = resolveSelectedColor();
+  const cutLineColor = cutLineColorInput?.value || "#000000";
+  const foldLineColor = foldLineColorInput?.value || "#808080";
 
   const boxSvgContent = createBoxSVG({
     width: W,
@@ -1477,6 +1536,8 @@ function generateBox() {
     inkSave,
     boxHeight: H,
     lidHeight,
+    cutLineColor,
+    foldLineColor,
   });
   svgContainerBox.innerHTML = boxSvgContent;
   const boxSvg = svgContainerBox.querySelector("svg");
@@ -1496,6 +1557,8 @@ function generateBox() {
     inkSave: false,
     boxHeight: lidHeight,
     lidHeight,
+    cutLineColor,
+    foldLineColor,
   });
   svgContainerLid.innerHTML = lidSvgContent;
   const lidSvg = svgContainerLid.querySelector("svg");
@@ -1622,10 +1685,14 @@ numericInputs.forEach((input) => {
   });
 });
 
+cutLineColorInput?.addEventListener("input", scheduleGenerate);
+foldLineColorInput?.addEventListener("input", scheduleGenerate);
+
 boxColorPicker?.addEventListener("input", () => {
   if (boxColorText) {
     boxColorText.value = boxColorPicker.value;
   }
+  updateFoldLineColorInput(boxColorPicker.value);
   syncColorPresetSelection();
   scheduleGenerate();
 });
@@ -1638,6 +1705,7 @@ boxColorText?.addEventListener("input", () => {
   const { hex } = normalizeToHex(boxColorText.value);
   if (hex && boxColorPicker) {
     boxColorPicker.value = hex;
+    updateFoldLineColorInput(hex);
   }
   syncColorPresetSelection();
   scheduleGenerate();
@@ -1669,6 +1737,7 @@ colorPresetSelect?.addEventListener("change", () => {
   const option = colorPresetSelect.selectedOptions[0];
   if (option) {
     if (option.value === "transparent") {
+      if (foldLineColorInput) foldLineColorInput.value = "#808080";
       updateColorInputsState();
       scheduleGenerate();
     } else if (option.dataset.color) {
@@ -1680,6 +1749,9 @@ colorPresetSelect?.addEventListener("change", () => {
     }
   }
 });
+
+cutLineColorInput?.addEventListener("input", scheduleGenerate);
+foldLineColorInput?.addEventListener("input", scheduleGenerate);
 
 showLabelsInput?.addEventListener("change", scheduleGenerate);
 
