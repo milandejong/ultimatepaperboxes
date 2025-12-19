@@ -14,6 +14,11 @@ const LAYOUT_CONSTANTS = {
   sideFlapWidth: 10,
 };
 
+const PAPER_SIZES = {
+  A4: { width: 210, height: 297 },
+  Letter: { width: 215.9, height: 279.4 },
+};
+
 const STYLES = {
   cut: "stroke:#000000; stroke-width:0.35; fill:none;",
   fold: {
@@ -440,41 +445,72 @@ function buildFoldLines(layout, styles = STYLES) {
   };
 }
 
-function buildCutPath(layout, styles = STYLES) {
+function buildCutPath(layout, styles = STYLES, trapezoid = false) {
   const { x, y, flaps } = layout;
+
+  // Calculate dimensions for tapering
+  const sideFlapW = x.x1 - x.x0;
+  const bottomFlapH = y.y7 - y.y6;
+
+  // For side flaps (Left/Right), the available height is y4 - y3 (Depth)
+  const sideFlapHeight = y.y4 - y.y3;
+  // For bottom flap, the available width is x4 - x3 (Width)
+  const bottomFlapWidth = x.x4 - x.x3;
+
+  // Calculate taper amounts
+  // If trapezoid, we want 45deg, so taper = flap length.
+  // But we must clamp it to half the available dimension to avoid crossing.
+  const sideTaper = trapezoid ? Math.min(sideFlapW, sideFlapHeight / 2) : 0;
+  const bottomTaper = trapezoid
+    ? Math.min(bottomFlapH, bottomFlapWidth / 2)
+    : 0;
+
   const commands = [
     `M ${x.x3},${y.y0}`,
     `L ${x.x4},${y.y0}`,
     `L ${x.x4},${y.y1}`,
     `L ${x.x4},${y.y2}`,
     `L ${x.x4},${y.y3}`,
+    // p1 (Top Right Dust Flap)
     `L ${flaps.p1.left},${y.y3}`,
     `L ${flaps.p1.left},${flaps.p1.top}`,
     `L ${flaps.p1.right},${flaps.p1.top}`,
     `L ${flaps.p1.right},${y.y3}`,
     `L ${x.x5},${y.y3}`,
-    `L ${x.x7},${y.y3}`,
-    `L ${x.x7},${y.y4}`,
+    // Right Tuck Flap (x6 to x7)
+    `L ${x.x6},${y.y3}`, // Base top
+    `L ${x.x7},${y.y3 + sideTaper}`, // Tip top
+    `L ${x.x7},${y.y4 - sideTaper}`, // Tip bottom
+    `L ${x.x6},${y.y4}`, // Base bottom
     `L ${x.x5},${y.y4}`,
     `L ${x.x4},${y.y4}`,
+    // p4 (Bottom Right Dust Flap)
     `L ${x.x4},${flaps.p4.top}`,
     `L ${flaps.p4.right},${flaps.p4.top}`,
     `L ${flaps.p4.right},${flaps.p4.bottom}`,
     `L ${x.x4},${flaps.p4.bottom}`,
     `L ${x.x4},${y.y5}`,
-    `L ${x.x4},${y.y7}`,
-    `L ${x.x3},${y.y7}`,
+    // Bottom Tuck Flap (y6 to y7)
+    `L ${x.x4},${y.y6}`, // Base right
+    `L ${x.x4 - bottomTaper},${y.y7}`, // Tip right
+    `L ${x.x3 + bottomTaper},${y.y7}`, // Tip left
+    `L ${x.x3},${y.y6}`, // Base left
     `L ${x.x3},${y.y5}`,
     `L ${x.x3},${y.y4}`,
+    // p2 (Bottom Left Dust Flap)
     `L ${flaps.p2.right},${y.y4}`,
     `L ${flaps.p2.right},${flaps.p2.bottom}`,
     `L ${flaps.p2.left},${flaps.p2.bottom}`,
     `L ${flaps.p2.left},${y.y4}`,
     `L ${x.x2},${y.y4}`,
-    `L ${x.x0},${y.y4}`,
-    `L ${x.x0},${y.y3}`,
+    // Left Tuck Flap (x0 to x1)
+    `L ${x.x1},${y.y4}`, // Base bottom
+    `L ${x.x0},${y.y4 - sideTaper}`, // Tip bottom
+    `L ${x.x0},${y.y3 + sideTaper}`, // Tip top
+    `L ${x.x1},${y.y3}`, // Base top
     `L ${x.x2},${y.y3}`,
     `L ${x.x3},${y.y3}`,
+    // p3 (Top Left Dust Flap)
     `L ${x.x3},${flaps.p3.bottom}`,
     `L ${flaps.p3.left},${flaps.p3.bottom}`,
     `L ${flaps.p3.left},${flaps.p3.top}`,
@@ -886,6 +922,8 @@ function createBoxSVG({
   lidHeight = 0,
   cutLineColor = null,
   foldLineColor = null,
+  trapezoidFlaps = false,
+  paperSize = null,
 }) {
   const layout = computeLayout(
     width,
@@ -896,7 +934,7 @@ function createBoxSVG({
   );
   const styles = getStyleConfig({ isLid, color, cutLineColor, foldLineColor });
   const foldLinesMarkup = buildFoldLines(layout, styles);
-  const cutPathMarkup = buildCutPath(layout, styles);
+  const cutPathMarkup = buildCutPath(layout, styles, trapezoidFlaps);
 
   const valleyGroupMarkup = foldLinesMarkup?.valley
     ? `<g id="valley-fold">${foldLinesMarkup.valley}</g>`
@@ -929,17 +967,35 @@ function createBoxSVG({
         allowance,
       })
     : "";
-  const widthMm = layout.viewBox.width;
-  const heightMm = layout.viewBox.height;
+
+  let widthMm = layout.viewBox.width;
+  let heightMm = layout.viewBox.height;
+  let viewBoxX = layout.viewBox.x;
+  let viewBoxY = layout.viewBox.y;
+  let viewBoxW = layout.viewBox.width;
+  let viewBoxH = layout.viewBox.height;
+
+  if (paperSize && PAPER_SIZES[paperSize]) {
+    const paper = PAPER_SIZES[paperSize];
+    widthMm = paper.width;
+    heightMm = paper.height;
+
+    // Center the content
+    const cx = layout.viewBox.x + layout.viewBox.width / 2;
+    const cy = layout.viewBox.y + layout.viewBox.height / 2;
+
+    viewBoxX = cx - widthMm / 2;
+    viewBoxY = cy - heightMm / 2;
+    viewBoxW = widthMm;
+    viewBoxH = heightMm;
+  }
 
   return `
           <svg 
               version="1.1"
               width="${widthMm}mm"
               height="${heightMm}mm"
-              viewBox="${layout.viewBox.x} ${layout.viewBox.y} ${
-    layout.viewBox.width
-  } ${layout.viewBox.height}" 
+              viewBox="${viewBoxX} ${viewBoxY} ${viewBoxW} ${viewBoxH}" 
               preserveAspectRatio="xMidYMid meet"
               xmlns="http://www.w3.org/2000/svg"
               data-physical-width-mm="${layout.viewBox.width}"
@@ -1067,15 +1123,16 @@ async function downloadPDF(containerId, filename) {
     return;
   }
 
-  const papers = {
-    A4: [210, 297],
-    Letter: [215.9, 279.4],
-  };
   const selectedPaper = paperSizeSelect ? paperSizeSelect.value : "A4";
-  const pageSize =
-    selectedPaper === "A4" || selectedPaper === "Letter"
-      ? papers[selectedPaper]
-      : [widthMm, heightMm];
+  let pageSize;
+  if (PAPER_SIZES[selectedPaper]) {
+    pageSize = [
+      PAPER_SIZES[selectedPaper].width,
+      PAPER_SIZES[selectedPaper].height,
+    ];
+  } else {
+    pageSize = [widthMm, heightMm];
+  }
   const pdf = new jsPdfCtor({
     unit: "mm",
     format: pageSize,
@@ -1116,6 +1173,7 @@ const lidHeightInput = document.getElementById("lidHeight");
 const allowanceInput = document.getElementById("allowance");
 const bleedInput = document.getElementById("bleed");
 const insideClearanceInput = document.getElementById("insideClearance");
+const trapezoidFlapsInput = document.getElementById("trapezoidFlaps");
 const cutLineColorInput = document.getElementById("cutLineColor");
 const foldLineColorInput = document.getElementById("foldLineColor");
 const boxColorPicker = document.getElementById("boxColorPicker");
@@ -1384,6 +1442,7 @@ function scheduleGenerate() {
   }
   pendingRenderFrame = window.requestAnimationFrame(() => {
     pendingRenderFrame = null;
+    saveSettings();
     generateBox();
   });
 }
@@ -1516,11 +1575,13 @@ function generateBox() {
   const lidHeight = parseInputValue(lidHeightInput, 20);
   setNumericInputValue(lidHeightInput, lidHeight, 20);
   const showLabels = Boolean(showLabelsInput?.checked);
+  const trapezoidFlaps = Boolean(trapezoidFlapsInput?.checked);
   const debugLabels = debugLabelsEnabled;
   const inkSave = Boolean(inkSaveInput?.checked);
   const appliedColor = resolveSelectedColor();
   const cutLineColor = cutLineColorInput?.value || "#000000";
   const foldLineColor = foldLineColorInput?.value || "#808080";
+  const selectedPaper = paperSizeSelect ? paperSizeSelect.value : "A4";
 
   const boxSvgContent = createBoxSVG({
     width: W,
@@ -1538,6 +1599,8 @@ function generateBox() {
     lidHeight,
     cutLineColor,
     foldLineColor,
+    trapezoidFlaps,
+    paperSize: selectedPaper,
   });
   svgContainerBox.innerHTML = boxSvgContent;
   const boxSvg = svgContainerBox.querySelector("svg");
@@ -1559,6 +1622,8 @@ function generateBox() {
     lidHeight,
     cutLineColor,
     foldLineColor,
+    trapezoidFlaps,
+    paperSize: selectedPaper,
   });
   svgContainerLid.innerHTML = lidSvgContent;
   const lidSvg = svgContainerLid.querySelector("svg");
@@ -1576,19 +1641,13 @@ function generateBox() {
     parseFloat(lidSvg.getAttribute("data-physical-height-mm") || "0") - margin;
 
   // Paper Size Logic
-  const papers = {
-    Letter: { w: 215.9, h: 279.4 },
-    A4: { w: 210, h: 297 },
-  };
-  const selectedPaper = paperSizeSelect ? paperSizeSelect.value : "A4";
-
   let boxFits = true;
   let lidFits = true;
 
   if (selectedPaper !== "None") {
-    const paperSize = papers[selectedPaper] || papers.A4;
-    const paperMin = Math.min(paperSize.w, paperSize.h);
-    const paperMax = Math.max(paperSize.w, paperSize.h);
+    const paperSize = PAPER_SIZES[selectedPaper] || PAPER_SIZES.A4;
+    const paperMin = Math.min(paperSize.width, paperSize.height);
+    const paperMax = Math.max(paperSize.width, paperSize.height);
 
     const checkFit = (w, h) => {
       const min = Math.min(w, h);
@@ -1754,6 +1813,7 @@ cutLineColorInput?.addEventListener("input", scheduleGenerate);
 foldLineColorInput?.addEventListener("input", scheduleGenerate);
 
 showLabelsInput?.addEventListener("change", scheduleGenerate);
+trapezoidFlapsInput?.addEventListener("change", scheduleGenerate);
 
 inkSaveInput?.addEventListener("change", scheduleGenerate);
 
@@ -1988,11 +2048,101 @@ function initDonateAvatarSwap() {
   });
 }
 
+const STORAGE_KEY = "ultimate_paper_boxes_settings";
+
+function saveSettings() {
+  const settings = {
+    width: widthInput?.value,
+    depth: depthInput?.value,
+    height: heightInput?.value,
+    lidHeight: lidHeightInput?.value,
+    allowance: allowanceInput?.value,
+    bleed: bleedInput?.value,
+    insideClearance: insideClearanceInput?.value,
+    trapezoidFlaps: trapezoidFlapsInput?.checked,
+    cutLineColor: cutLineColorInput?.value,
+    foldLineColor: foldLineColorInput?.value,
+    boxColor: boxColorPicker?.value,
+    showLabels: showLabelsInput?.checked,
+    inkSave: inkSaveInput?.checked,
+    paperSize: paperSizeSelect?.value,
+    dimensionPreset: dimensionPresetSelect?.value,
+    colorPreset: colorPresetSelect?.value,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+}
+
+function loadSettings() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return;
+
+  try {
+    const settings = JSON.parse(saved);
+
+    if (settings.width && widthInput) widthInput.value = settings.width;
+    if (settings.depth && depthInput) depthInput.value = settings.depth;
+    if (settings.height && heightInput) heightInput.value = settings.height;
+    if (settings.lidHeight && lidHeightInput)
+      lidHeightInput.value = settings.lidHeight;
+    if (settings.allowance && allowanceInput)
+      allowanceInput.value = settings.allowance;
+    if (settings.bleed && bleedInput) bleedInput.value = settings.bleed;
+    if (settings.insideClearance && insideClearanceInput)
+      insideClearanceInput.value = settings.insideClearance;
+
+    if (settings.trapezoidFlaps !== undefined && trapezoidFlapsInput)
+      trapezoidFlapsInput.checked = settings.trapezoidFlaps;
+    if (settings.cutLineColor && cutLineColorInput)
+      cutLineColorInput.value = settings.cutLineColor;
+    if (settings.foldLineColor && foldLineColorInput)
+      foldLineColorInput.value = settings.foldLineColor;
+
+    if (settings.boxColor) {
+      if (boxColorPicker) boxColorPicker.value = settings.boxColor;
+      if (boxColorText) boxColorText.value = settings.boxColor;
+    }
+
+    if (settings.showLabels !== undefined && showLabelsInput)
+      showLabelsInput.checked = settings.showLabels;
+    if (settings.inkSave !== undefined && inkSaveInput)
+      inkSaveInput.checked = settings.inkSave;
+    if (settings.paperSize && paperSizeSelect)
+      paperSizeSelect.value = settings.paperSize;
+
+    if (settings.dimensionPreset && dimensionPresetSelect) {
+      if (
+        [...dimensionPresetSelect.options].some(
+          (o) => o.value === settings.dimensionPreset
+        )
+      ) {
+        dimensionPresetSelect.value = settings.dimensionPreset;
+      }
+    }
+    if (settings.colorPreset && colorPresetSelect) {
+      if (
+        [...colorPresetSelect.options].some(
+          (o) => o.value === settings.colorPreset
+        )
+      ) {
+        colorPresetSelect.value = settings.colorPreset;
+      }
+    }
+
+    // Update UI state based on loaded values
+    updateColorInputsState();
+  } catch (e) {
+    console.error("Failed to load settings", e);
+  }
+}
+
 window.addEventListener("load", async () => {
   await Promise.all([loadPresets(), loadFooterLogo()]);
   populatePresetDropdowns();
 
-  if (colorPresetSelect) {
+  // Load settings after presets are populated
+  loadSettings();
+
+  if (colorPresetSelect && !localStorage.getItem(STORAGE_KEY)) {
     colorPresetSelect.value = "transparent";
   }
 
