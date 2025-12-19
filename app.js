@@ -1442,6 +1442,7 @@ function scheduleGenerate() {
   }
   pendingRenderFrame = window.requestAnimationFrame(() => {
     pendingRenderFrame = null;
+    saveSettings();
     generateBox();
   });
 }
@@ -2047,11 +2048,101 @@ function initDonateAvatarSwap() {
   });
 }
 
+const STORAGE_KEY = "ultimate_paper_boxes_settings";
+
+function saveSettings() {
+  const settings = {
+    width: widthInput?.value,
+    depth: depthInput?.value,
+    height: heightInput?.value,
+    lidHeight: lidHeightInput?.value,
+    allowance: allowanceInput?.value,
+    bleed: bleedInput?.value,
+    insideClearance: insideClearanceInput?.value,
+    trapezoidFlaps: trapezoidFlapsInput?.checked,
+    cutLineColor: cutLineColorInput?.value,
+    foldLineColor: foldLineColorInput?.value,
+    boxColor: boxColorPicker?.value,
+    showLabels: showLabelsInput?.checked,
+    inkSave: inkSaveInput?.checked,
+    paperSize: paperSizeSelect?.value,
+    dimensionPreset: dimensionPresetSelect?.value,
+    colorPreset: colorPresetSelect?.value,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+}
+
+function loadSettings() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return;
+
+  try {
+    const settings = JSON.parse(saved);
+
+    if (settings.width && widthInput) widthInput.value = settings.width;
+    if (settings.depth && depthInput) depthInput.value = settings.depth;
+    if (settings.height && heightInput) heightInput.value = settings.height;
+    if (settings.lidHeight && lidHeightInput)
+      lidHeightInput.value = settings.lidHeight;
+    if (settings.allowance && allowanceInput)
+      allowanceInput.value = settings.allowance;
+    if (settings.bleed && bleedInput) bleedInput.value = settings.bleed;
+    if (settings.insideClearance && insideClearanceInput)
+      insideClearanceInput.value = settings.insideClearance;
+
+    if (settings.trapezoidFlaps !== undefined && trapezoidFlapsInput)
+      trapezoidFlapsInput.checked = settings.trapezoidFlaps;
+    if (settings.cutLineColor && cutLineColorInput)
+      cutLineColorInput.value = settings.cutLineColor;
+    if (settings.foldLineColor && foldLineColorInput)
+      foldLineColorInput.value = settings.foldLineColor;
+
+    if (settings.boxColor) {
+      if (boxColorPicker) boxColorPicker.value = settings.boxColor;
+      if (boxColorText) boxColorText.value = settings.boxColor;
+    }
+
+    if (settings.showLabels !== undefined && showLabelsInput)
+      showLabelsInput.checked = settings.showLabels;
+    if (settings.inkSave !== undefined && inkSaveInput)
+      inkSaveInput.checked = settings.inkSave;
+    if (settings.paperSize && paperSizeSelect)
+      paperSizeSelect.value = settings.paperSize;
+
+    if (settings.dimensionPreset && dimensionPresetSelect) {
+      if (
+        [...dimensionPresetSelect.options].some(
+          (o) => o.value === settings.dimensionPreset
+        )
+      ) {
+        dimensionPresetSelect.value = settings.dimensionPreset;
+      }
+    }
+    if (settings.colorPreset && colorPresetSelect) {
+      if (
+        [...colorPresetSelect.options].some(
+          (o) => o.value === settings.colorPreset
+        )
+      ) {
+        colorPresetSelect.value = settings.colorPreset;
+      }
+    }
+
+    // Update UI state based on loaded values
+    updateColorInputsState();
+  } catch (e) {
+    console.error("Failed to load settings", e);
+  }
+}
+
 window.addEventListener("load", async () => {
   await Promise.all([loadPresets(), loadFooterLogo()]);
   populatePresetDropdowns();
 
-  if (colorPresetSelect) {
+  // Load settings after presets are populated
+  loadSettings();
+
+  if (colorPresetSelect && !localStorage.getItem(STORAGE_KEY)) {
     colorPresetSelect.value = "transparent";
   }
 
