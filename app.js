@@ -14,6 +14,11 @@ const LAYOUT_CONSTANTS = {
   sideFlapWidth: 10,
 };
 
+const PAPER_SIZES = {
+  A4: { width: 210, height: 297 },
+  Letter: { width: 215.9, height: 279.4 },
+};
+
 const STYLES = {
   cut: "stroke:#000000; stroke-width:0.35; fill:none;",
   fold: {
@@ -918,6 +923,7 @@ function createBoxSVG({
   cutLineColor = null,
   foldLineColor = null,
   trapezoidFlaps = false,
+  paperSize = null,
 }) {
   const layout = computeLayout(
     width,
@@ -961,17 +967,35 @@ function createBoxSVG({
         allowance,
       })
     : "";
-  const widthMm = layout.viewBox.width;
-  const heightMm = layout.viewBox.height;
+
+  let widthMm = layout.viewBox.width;
+  let heightMm = layout.viewBox.height;
+  let viewBoxX = layout.viewBox.x;
+  let viewBoxY = layout.viewBox.y;
+  let viewBoxW = layout.viewBox.width;
+  let viewBoxH = layout.viewBox.height;
+
+  if (paperSize && PAPER_SIZES[paperSize]) {
+    const paper = PAPER_SIZES[paperSize];
+    widthMm = paper.width;
+    heightMm = paper.height;
+
+    // Center the content
+    const cx = layout.viewBox.x + layout.viewBox.width / 2;
+    const cy = layout.viewBox.y + layout.viewBox.height / 2;
+
+    viewBoxX = cx - widthMm / 2;
+    viewBoxY = cy - heightMm / 2;
+    viewBoxW = widthMm;
+    viewBoxH = heightMm;
+  }
 
   return `
           <svg 
               version="1.1"
               width="${widthMm}mm"
               height="${heightMm}mm"
-              viewBox="${layout.viewBox.x} ${layout.viewBox.y} ${
-    layout.viewBox.width
-  } ${layout.viewBox.height}" 
+              viewBox="${viewBoxX} ${viewBoxY} ${viewBoxW} ${viewBoxH}" 
               preserveAspectRatio="xMidYMid meet"
               xmlns="http://www.w3.org/2000/svg"
               data-physical-width-mm="${layout.viewBox.width}"
@@ -1099,15 +1123,16 @@ async function downloadPDF(containerId, filename) {
     return;
   }
 
-  const papers = {
-    A4: [210, 297],
-    Letter: [215.9, 279.4],
-  };
   const selectedPaper = paperSizeSelect ? paperSizeSelect.value : "A4";
-  const pageSize =
-    selectedPaper === "A4" || selectedPaper === "Letter"
-      ? papers[selectedPaper]
-      : [widthMm, heightMm];
+  let pageSize;
+  if (PAPER_SIZES[selectedPaper]) {
+    pageSize = [
+      PAPER_SIZES[selectedPaper].width,
+      PAPER_SIZES[selectedPaper].height,
+    ];
+  } else {
+    pageSize = [widthMm, heightMm];
+  }
   const pdf = new jsPdfCtor({
     unit: "mm",
     format: pageSize,
@@ -1555,6 +1580,7 @@ function generateBox() {
   const appliedColor = resolveSelectedColor();
   const cutLineColor = cutLineColorInput?.value || "#000000";
   const foldLineColor = foldLineColorInput?.value || "#808080";
+  const selectedPaper = paperSizeSelect ? paperSizeSelect.value : "A4";
 
   const boxSvgContent = createBoxSVG({
     width: W,
@@ -1573,6 +1599,7 @@ function generateBox() {
     cutLineColor,
     foldLineColor,
     trapezoidFlaps,
+    paperSize: selectedPaper,
   });
   svgContainerBox.innerHTML = boxSvgContent;
   const boxSvg = svgContainerBox.querySelector("svg");
@@ -1595,6 +1622,7 @@ function generateBox() {
     cutLineColor,
     foldLineColor,
     trapezoidFlaps,
+    paperSize: selectedPaper,
   });
   svgContainerLid.innerHTML = lidSvgContent;
   const lidSvg = svgContainerLid.querySelector("svg");
@@ -1612,19 +1640,13 @@ function generateBox() {
     parseFloat(lidSvg.getAttribute("data-physical-height-mm") || "0") - margin;
 
   // Paper Size Logic
-  const papers = {
-    Letter: { w: 215.9, h: 279.4 },
-    A4: { w: 210, h: 297 },
-  };
-  const selectedPaper = paperSizeSelect ? paperSizeSelect.value : "A4";
-
   let boxFits = true;
   let lidFits = true;
 
   if (selectedPaper !== "None") {
-    const paperSize = papers[selectedPaper] || papers.A4;
-    const paperMin = Math.min(paperSize.w, paperSize.h);
-    const paperMax = Math.max(paperSize.w, paperSize.h);
+    const paperSize = PAPER_SIZES[selectedPaper] || PAPER_SIZES.A4;
+    const paperMin = Math.min(paperSize.width, paperSize.height);
+    const paperMax = Math.max(paperSize.width, paperSize.height);
 
     const checkFit = (w, h) => {
       const min = Math.min(w, h);
