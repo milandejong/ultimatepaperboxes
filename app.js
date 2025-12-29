@@ -1392,9 +1392,21 @@ function sanitizeFilenameSegment(text) {
 }
 
 function buildDownloadFilename(type = "box") {
-  const dimensionLabel = dimensionPresetSelect?.value
-    ? getSelectedOptionLabel(dimensionPresetSelect, "Custom dimensions")
-    : describeCustomDimensions();
+  let dimensionLabel;
+  if (dimensionPresetSelect?.value) {
+    const option = dimensionPresetSelect.selectedOptions?.[0];
+    const presetName = option?.textContent?.trim();
+    const groupName =
+      option?.parentElement?.tagName === "OPTGROUP"
+        ? option.parentElement.label
+        : null;
+    dimensionLabel = groupName
+      ? `${groupName} - ${presetName}`
+      : presetName || "Custom dimensions";
+  } else {
+    dimensionLabel = describeCustomDimensions();
+  }
+
   const colorLabel = colorPresetSelect?.value
     ? getSelectedOptionLabel(colorPresetSelect, describeCustomColor())
     : describeCustomColor();
