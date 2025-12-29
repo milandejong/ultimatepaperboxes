@@ -1100,22 +1100,22 @@ async function svgToPngDataUrl(svgEl) {
 
 async function downloadPDF(containerId, filename) {
   const container = document.getElementById(containerId);
-  if (!container) {
-    return;
-  }
+  const svg = container?.querySelector("svg");
+  if (!svg) return;
 
-  const svg = container.querySelector("svg");
-  if (!svg) {
-    return;
-  }
+  const getSvgDim = (key) => parseFloat(svg.getAttribute(key));
 
-  const widthMm = parseFloat(svg.getAttribute("data-physical-width-mm") || "0");
-  const heightMm = parseFloat(
-    svg.getAttribute("data-physical-height-mm") || "0"
-  );
+  // Try standard attributes first, fallback to data attributes
+  // We check both to ensure we don't mix coordinate systems (e.g. paper vs content)
+  let widthMm = getSvgDim("width");
+  let heightMm = getSvgDim("height");
+
   if (!widthMm || !heightMm) {
-    return;
+    widthMm = getSvgDim("data-physical-width-mm") || 0;
+    heightMm = getSvgDim("data-physical-height-mm") || 0;
   }
+
+  if (!widthMm || !heightMm) return;
 
   const jsPdfCtor = window.jspdf?.jsPDF;
   if (!jsPdfCtor) {
@@ -1123,16 +1123,11 @@ async function downloadPDF(containerId, filename) {
     return;
   }
 
-  const selectedPaper = paperSizeSelect ? paperSizeSelect.value : "A4";
-  let pageSize;
-  if (PAPER_SIZES[selectedPaper]) {
-    pageSize = [
-      PAPER_SIZES[selectedPaper].width,
-      PAPER_SIZES[selectedPaper].height,
-    ];
-  } else {
-    pageSize = [widthMm, heightMm];
-  }
+  const selectedPaper = paperSizeSelect?.value ?? "A4";
+  const paperSize = PAPER_SIZES[selectedPaper];
+  const pageSize = paperSize
+    ? [paperSize.width, paperSize.height]
+    : [widthMm, heightMm];
   const pdf = new jsPdfCtor({
     unit: "mm",
     format: pageSize,
@@ -1397,9 +1392,21 @@ function sanitizeFilenameSegment(text) {
 }
 
 function buildDownloadFilename(type = "box") {
-  const dimensionLabel = dimensionPresetSelect?.value
-    ? getSelectedOptionLabel(dimensionPresetSelect, "Custom dimensions")
-    : describeCustomDimensions();
+  let dimensionLabel;
+  if (dimensionPresetSelect?.value) {
+    const option = dimensionPresetSelect.selectedOptions?.[0];
+    const presetName = option?.textContent?.trim();
+    const groupName =
+      option?.parentElement?.tagName === "OPTGROUP"
+        ? option.parentElement.label
+        : null;
+    dimensionLabel = groupName
+      ? `${groupName} - ${presetName}`
+      : presetName || "Custom dimensions";
+  } else {
+    dimensionLabel = describeCustomDimensions();
+  }
+
   const colorLabel = colorPresetSelect?.value
     ? getSelectedOptionLabel(colorPresetSelect, describeCustomColor())
     : describeCustomColor();
